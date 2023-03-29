@@ -1,0 +1,60 @@
+{
+  "station": "SOCHI",
+  "project_name": "SOCHI",
+  "count_of_groups": 11,
+  "number_of_samples": 12,
+  "model":{
+    "N": 19,
+    "blacklist_sensors": [
+	  "Sochi2.GT.AM.20MBL30CM005-AM.Q",
+	  "Sochi2.GT.AM.20MBL30CT005-AM.Q",
+	  "Sochi2.GT.AM.20MBT10CP005-AM.Q",
+	  "Sochi2.GT.AM.20MBT10CT005-AM.Q",
+	  "Sochi2.UNIT.AM.20CJA01CT001-AM.Q",
+	  "Sochi2.UNIT.AM.20MKA10CE803-AM.Q"
+    ],
+    "approx_sensors": [
+      "Sochi2.GT.AM.20MKA10CT015-AM.Q",
+      "Sochi2.GT.AM.20CFA10CE001-AM.Q"
+    ],
+    "N_l": 100,
+    "delta": 2016,
+    "s": 1,
+    "P_pr": 0.95,
+    "T_pr": 168,
+    "delta_tau_P": 6,
+    "delta_tau_T": 0,
+	"rolling": 4
+  },
+  "paths":{
+	  "files":{
+		  "original_csv": "slices.csv",
+		  "original_kks": "kks_with_groups.csv",
+		  "excel_sensors": "sensors.xlsx",
+		  "json_sensors": "sensors.json",
+		  "excel_df": "slices_GT.xlsx",
+		  "excel_df_train": "slices_GT_train.xlsx",
+		  "coef_train_json": "slices_GT_coef_train.json",
+		  "sqlite_norm": "slices_GT_norm.sqlite",
+		  "points_json": "points_",
+		  "index_sensors_json": "index_sensors_",
+		  "potentials_csv": "potential.csv",
+		  "loss_csv": "loss.csv",
+		  "probability_csv": "probability_stat.csv",
+		  "table_potential_probability": "potential_probability.csv",
+		  "threshold_json": "threshold.json",
+		  "anomaly_time_prob": "time_to_anomaly_prob.csv",
+		  "save_models_prob": "models_regression_prob.json",
+		  "anomaly_time_intercept": "time_to_anomaly_intercept.csv",
+		  "save_models_intercept": "models_regression_intercept.json",
+		  "intervals_json": "json_interval/group_"
+	  },
+	  "graphs":{
+		  "hist_potential_probability": "hist_potential_probability.png",
+		  "scale_potential": "scale_potential.png",
+		  "scale_power": "scale_power.png",
+		  "scale_potential_week": "scale_potential_week.png",
+		  "scale_power_week": "scale_power_week.png"
+	  }
+  }
+}
