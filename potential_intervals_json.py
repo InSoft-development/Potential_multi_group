@@ -4,6 +4,7 @@ import sys
 import json
 import pandas as pd
 
+import os
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -146,16 +147,16 @@ if __name__ == '__main__':
         with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
-        index_group = [list(x.keys())[0][0] for x in json_dict["groups"]]
+        index_group = [list(x.keys())[0] for x in json_dict["groups"]]
         if index_group[0] == '0':
             index_group.remove('0')
         for group in index_group:
             if int(input_anomaly_file) == 0:
-                path_to_anomaly_time = str(group) + "\\" + config_json['paths']['files']['anomaly_time_prob']
+                path_to_anomaly_time = str(group) + os.sep + config_json['paths']['files']['anomaly_time_prob']
             if int(input_anomaly_file) == 1:
-                path_to_anomaly_time = str(group) + "\\" + config_json['paths']['files']['anomaly_time_intercept']
-            path_to_loss = str(group) + "\\" + config_json['paths']['files']['loss_csv']
-            path_to_threshold_json = str(group) + "\\" + config_json['paths']['files']['threshold_json']
+                path_to_anomaly_time = str(group) + os.sep + config_json['paths']['files']['anomaly_time_intercept']
+            path_to_loss = str(group) + os.sep + config_json['paths']['files']['loss_csv']
+            path_to_threshold_json = str(group) + os.sep + config_json['paths']['files']['threshold_json']
             path_to_index_sensors = config_json['paths']['files']['index_sensors_json'] + str(group)+".json"
             path_to_intervals_json = config_json['paths']['files']['intervals_json'] + str(group) + ".json"
             interval_group(str(group))

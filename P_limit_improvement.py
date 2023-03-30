@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 import scipy.stats
+import os
 
 
 def create_parser():
@@ -45,11 +46,11 @@ def p_limit_one_power(power_sensor):
     plt.plot(d, probabilities, 'g')
     plt.plot(d, potentials, 'r')
     data['P'] = [100 * (1 - i) for i in dist.cdf(data['potential'].values)]
-    data.to_csv(str(group) + "\\" + path_to_probability)
+    data.to_csv(str(group) + os.sep + path_to_probability)
     print("limit ok")
 
     df = pd.DataFrame(data={'potential': d, 'probability': probabilities}, index=None)
-    df.to_csv(str(group) + "\\" + path_to_csv, index=False)
+    df.to_csv(str(group) + os.sep + path_to_csv, index=False)
     temp = df.index[(df['probability'] < config_json['model']['P_pr'] * 100 + 1)].tolist()
     print(temp)
     ind = temp[0]
@@ -58,7 +59,7 @@ def p_limit_one_power(power_sensor):
     plt.axvline(d[ind], color='brown')
     plt.title("probability and hist of potential")
     plt.legend(["probability", "hist of potential", "threshold"])
-    plt.savefig(str(group) + "\\" + path_to_png)
+    plt.savefig(str(group) + os.sep + path_to_png)
     plt.show()
     print(df)
 
@@ -89,11 +90,11 @@ def p_limit_two_power(power_sensor_1, power_sensor_2):
     plt.plot(d, probabilities, 'g')
     plt.plot(d, potentials, 'r')
     data['P'] = [100 * (1 - i) for i in dist.cdf(data['potential'].values)]
-    data.to_csv(str(group) + "\\" + path_to_probability)
+    data.to_csv(str(group) + os.sep + path_to_probability)
     print("limit ok")
 
     df = pd.DataFrame(data={'potential': d, 'probability': probabilities}, index=None)
-    df.to_csv(str(group) + "\\" + path_to_csv, index=False)
+    df.to_csv(str(group) + os.sep + path_to_csv, index=False)
     temp = df.index[(df['probability'] < config_json['model']['P_pr'] * 100 + 1)].tolist()
     print(temp)
     ind = temp[0]
@@ -102,7 +103,7 @@ def p_limit_two_power(power_sensor_1, power_sensor_2):
     plt.axvline(d[ind], color='brown')
     plt.title("probability and hist of potential")
     plt.legend(["probability", "hist of potential", "threshold"])
-    plt.savefig(str(group) + "\\" + path_to_png)
+    plt.savefig(str(group) + os.sep + path_to_png)
     plt.clf()
     #plt.show()
     print(df)
@@ -110,10 +111,10 @@ def p_limit_two_power(power_sensor_1, power_sensor_2):
 
 if __name__ == '__main__':
     parser = create_parser()
-    with open("config_SOCHI_generator.json", 'r', encoding='utf8') as j:
+    with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
     if len(sys.argv) == 1:
-        print("config SOCHI_generator")
+        print("config SOCHI")
         #path_to_df = "1\\" + config_json['paths']['files']['potentials_csv']
         path_to_power = config_json['paths']['files']['excel_df']
         path_to_probability = config_json['paths']['files']['probability_csv']
@@ -124,22 +125,22 @@ if __name__ == '__main__':
         with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
-        index_group = [list(x.keys())[0][0] for x in json_dict["groups"]]
+        index_group = [list(x.keys())[0] for x in json_dict["groups"]]
         if index_group[0] == '0':
             index_group.remove('0')
         if len(power) == 1:
             for group in index_group:
                 threshold_json = {}
-                path_to_df = str(group) + "\\" + config_json['paths']['files']['potentials_csv']
+                path_to_df = str(group) + os.sep + config_json['paths']['files']['potentials_csv']
                 p_limit_one_power(power[0])
-                with open(str(group) + "\\" + path_to_threshold_json, 'w', encoding='utf8') as f:
+                with open(str(group) + os.sep + path_to_threshold_json, 'w', encoding='utf8') as f:
                     json.dump(threshold_json, f, ensure_ascii=False, indent=4)
         else:
             for group in index_group:
                 threshold_json = {}
-                path_to_df = str(group) + "\\" + config_json['paths']['files']['potentials_csv']
+                path_to_df = str(group) + os.sep + config_json['paths']['files']['potentials_csv']
                 p_limit_two_power(power[0], power[1])
-                with open(str(group) + "\\" + path_to_threshold_json, 'w', encoding='utf8') as f:
+                with open(str(group) + os.sep + path_to_threshold_json, 'w', encoding='utf8') as f:
                     json.dump(threshold_json, f, ensure_ascii=False, indent=4)
     else:
         print("command's line arguments")

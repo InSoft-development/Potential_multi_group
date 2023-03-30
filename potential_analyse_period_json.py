@@ -9,7 +9,6 @@ import time
 
 nums = []
 points = {}
-#t_sum
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -27,7 +26,7 @@ def kks_load():
     with open(file_json, 'r', encoding='utf8') as f:
         json_dict = json.load(f)
 
-    index_group = [list(x.keys())[0][0] for x in json_dict["groups"]]
+    index_group = [list(x.keys())[0] for x in json_dict["groups"]]
     try:
         index_group = index_group.index(str(group))
     except ValueError:
@@ -70,7 +69,6 @@ def potentials_analyse(data):
     sum_p = 0
     # словарь суммарного потенциала датчиков группы
     sum_num = {n: 0 for n in nums}
-    sum_num_loss = {n: [] for n in nums}
     points_length = config_json['model']['N_l']
 
     # вычисление потенциала
@@ -83,7 +81,6 @@ def potentials_analyse(data):
             delta = (p_norm - data_norm[num]) ** 2
             R += delta
             sum_num[num] += delta / points_length
-            #sum_num_loss[num].append(delta)  # вклад датчика
         sum_p += 1 / (1 + R)
     # sum_p = sum_p / len(nums)
     sum_p = sum_p / ((points_length+2)*len(nums))
@@ -106,7 +103,7 @@ def analyse_loop_month_one_powers(file_name, file_power):
     con = sqlite3.connect(file_name)
     df = pd.read_sql_query("SELECT * from data", con)
     df_power = pd.read_excel(file_power, sheet_name="slices")
-    print(df.head())
+    #print(df.head())
 
     anomaly = []
     t = []
@@ -268,9 +265,10 @@ if __name__ == '__main__':
         with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
-        index_group = [list(x.keys())[0][0] for x in json_dict["groups"]]
+        index_group = [list(x.keys())[0] for x in json_dict["groups"]]
         if index_group[0] == '0':
             index_group.remove('0')
+        print(index_group)
         for group in index_group:
             path_to_points = config_json['paths']['files']['points_json'] + str(group) + ".json"
             path_to_index_sensors = config_json['paths']['files']['index_sensors_json'] + str(group) + ".json"

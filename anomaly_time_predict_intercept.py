@@ -13,6 +13,7 @@ import json
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
+import os
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -192,7 +193,7 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_pote
                 print(row['t'], row['P'], "Window...")
     end = time.time() - start
     # сохранение коэффициентов в json
-    path_to_save_models = str(group) + "\\" + config_json['paths']['files']['save_models_intercept']
+    path_to_save_models = str(group) + os.sep + config_json['paths']['files']['save_models_intercept']
     with open(path_to_save_models, 'w', encoding='utf8') as f:
         json.dump(models_json, f, ensure_ascii=False, indent=4)
 
@@ -286,13 +287,13 @@ if __name__ == '__main__':
         with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
-        index_group = [list(x.keys())[0][0] for x in json_dict["groups"]]
+        index_group = [list(x.keys())[0] for x in json_dict["groups"]]
         if index_group[0] == '0':
             index_group.remove('0')
         for group in index_group:
-            path_to_probability = str(group) + "\\" + config_json['paths']['files']['probability_csv']
-            path_to_potentials = str(group) + "\\" + config_json['paths']['files']['potentials_csv']
-            path_to_anomaly_time = str(group) + "\\" + config_json['paths']['files']['anomaly_time_intercept']
+            path_to_probability = str(group) + os.sep + config_json['paths']['files']['probability_csv']
+            path_to_potentials = str(group) + os.sep + config_json['paths']['files']['potentials_csv']
+            path_to_anomaly_time = str(group) + os.sep + config_json['paths']['files']['anomaly_time_intercept']
             calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_potentials, path_to_anomaly_time)
     else:
         print("command's line arguments")
