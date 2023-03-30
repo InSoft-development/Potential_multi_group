@@ -1,10 +1,10 @@
 import argparse
-import os
 import sys
 import json
 import pandas as pd
 
 import os
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -84,11 +84,13 @@ def interval_group(group):
         json.dump(dict_list, f, ensure_ascii=False, indent=4)
 
 
+# Определение датчиков, внесших max вклад в аномалию через loss
 def mean_index(data, top_count=3):
     mean_loss = data.mean().sort_values(ascending=False).index[:top_count].to_list()
     return mean_loss
 
 
+# Игра в бисер - определение датчиков, внесших max вклада в аномалию
 def max_index(group, data):
     with open(path_to_index_sensors + str(group) + ".json", 'r', encoding='utf8') as j:
         index_sensors_json = json.load(j)
