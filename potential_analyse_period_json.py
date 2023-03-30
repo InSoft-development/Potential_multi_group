@@ -23,6 +23,7 @@ def create_parser():
 
 
 def kks_load():
+    nums = []
     with open(file_json, 'r', encoding='utf8') as f:
         json_dict = json.load(f)
 
