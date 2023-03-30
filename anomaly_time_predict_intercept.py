@@ -279,10 +279,10 @@ def check_regress(path_to_anomaly_time):
 if __name__ == '__main__':
     # Заполнение коэффициентов json из всего dataframe
     parser = create_parser()
-    with open("config_SOCHI_generator.json", 'r', encoding='utf8') as j:
+    with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
     if len(sys.argv) == 1:
-        print("config SOCHI_generator")
+        print("config SOCHI")
         path_to_csv = config_json['paths']['files']['original_csv']
         with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
             json_dict = json.load(f)
