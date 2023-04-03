@@ -10,6 +10,7 @@ import time
 nums = []
 points = {}
 
+
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("file_json", nargs=1, help="json file with unions and sensors")

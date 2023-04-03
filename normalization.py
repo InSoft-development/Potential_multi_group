@@ -238,7 +238,7 @@ def normalize_multi_regress_two_powers_df(df_union, path_to_json, approx_1, appr
     try:
         len(normalize_multi_regress_two_powers_df.coef_df)
     except AttributeError:
-        print("read json")
+        #print("read json")
         with open(path_to_json, 'r', encoding='utf8') as f:
             coef_json = json.load(f)
         normalize_multi_regress_two_powers_df.coef_df = coef_json
@@ -259,19 +259,19 @@ def normalize_multi_regress_two_powers_row(dict_union, path_to_json, approx_1, a
     try:
         len(normalize_multi_regress_two_powers_row.coef_row)
     except AttributeError:
-        print("read json")
+        #print("read json")
         with open(path_to_json, 'r', encoding='utf8') as f:
             coef_json_row = json.load(f)
         normalize_multi_regress_two_powers_row.coef_row = coef_json_row
     dict_norm['timestamp'] = dict_union['timestamp']
     for key in list(normalize_multi_regress_two_powers_row.coef_row.keys()):
-        print(dict_union[key])
+        #print(dict_union[key])
         dict_norm[key] = dict_union[key] - dict_union[approx_1]*normalize_multi_regress_two_powers_row.coef_row[key]['a'] -\
                          dict_union[approx_2]*normalize_multi_regress_two_powers_row.coef_row[key]['b'] - \
                          normalize_multi_regress_two_powers_row.coef_row[key]['c']
-        print(dict_norm[key])
+        #print(dict_norm[key])
         dict_norm[key] -= normalize_multi_regress_two_powers_row.coef_row[key]['avg']
-        print(dict_norm[key])
+        #print(dict_norm[key])
         dict_norm[key] = dict_norm[key] / (3 * normalize_multi_regress_two_powers_row.coef_row[key]['sigma'])
-        print(dict_norm[key])
+        #print(dict_norm[key])
     return dict_norm
