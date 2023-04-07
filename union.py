@@ -5,9 +5,10 @@ import sqlite3
 
 
 # Функция сериализует и записывает json c выделенными union
-def json_build(file_excel, sheet, path_to_save):
-    data_excel = pd.read_excel(file_excel, sheet_name=sheet,
-                               converters={"Groups": str})
+def json_build(file_csv, path_to_save, sheet='SOCHI'):
+    data_csv = pd.read_csv(file_csv, delimiter=';', header=None)
+    if 3 not in data_csv.columns.to_list():
+        data_csv[3] = np.NaN
     json_dict = {
         "station": sheet,
         "groups": [],
@@ -15,7 +16,7 @@ def json_build(file_excel, sheet, path_to_save):
     }
 
     # Добавление групп
-    unique_group = data_excel["Groups"].unique()
+    unique_group = data_csv[2].unique()
     temp_unique = []
     for uniqum in unique_group:
         if not pd.isna(uniqum):
@@ -33,21 +34,21 @@ def json_build(file_excel, sheet, path_to_save):
                 "single sensors": "null"
             }
         }
-        temp_rows = data_excel[data_excel["Groups"].str.contains(group, regex=False) == True]
+        temp_rows = data_csv[data_csv[2].str.contains(group, regex=False) == True]
         correct_temp_index = []
         for index, row in temp_rows.iterrows():
-            split_array = str(row["Groups"]).split(sep=',')
+            split_array = str(row[2]).split(sep=',')
             split_array = [int(i) for i in split_array]
             if int(group) in split_array:
                 correct_temp_index.append(index)
         temp_rows = temp_rows.loc[correct_temp_index]
-        unique_unions = temp_rows["Unions"].unique()
+        unique_unions = temp_rows[3].unique()
         marked_union = []
         for union in unique_unions:
             # Непомеченные union датчики
             if pd.isna(union):
-                single_sensors = temp_rows.loc[(temp_rows["Unions"].isnull()), ["External Tags"]]
-                single_sensors = single_sensors["External Tags"].to_list()
+                single_sensors = temp_rows.loc[(temp_rows[3].isnull()), [0]]
+                single_sensors = single_sensors[0].to_list()
                 single_sensors = list(map(str, single_sensors))
                 group_dict[str(int(group))]["single sensors"] = single_sensors
             else:
@@ -58,7 +59,7 @@ def json_build(file_excel, sheet, path_to_save):
                     print(temp)
                     if ("("+group+")" in temp) and (temp not in marked_union):
                         print(temp)
-                        union_rows = temp_rows.loc[(temp_rows["Unions"].str.contains(temp, regex=False) == True)]
+                        union_rows = temp_rows.loc[(temp_rows[3].str.contains(temp, regex=False) == True)]
                         print(union_rows)
                         union_dict = {
                             str(int(temp[:temp.find('(')])): {
@@ -67,7 +68,7 @@ def json_build(file_excel, sheet, path_to_save):
                             }
                         }
                         print(union_dict)
-                        union_sensors = union_rows["External Tags"].to_list()
+                        union_sensors = union_rows[0].to_list()
                         if group_dict[str(int(group))]["unions"] == "null":
                             group_dict[str(int(group))]["unions"] = []
                         union_dict[str(int(temp[:temp.find('(')]))]["sensors"] = union_sensors
@@ -76,7 +77,7 @@ def json_build(file_excel, sheet, path_to_save):
         json_dict["groups"].append(group_dict)
 
     # Непомеченные группы
-    no_group_sensors = data_excel.loc[(pd.isna(data_excel["Groups"]))]["External Tags"].to_list()
+    no_group_sensors = data_csv.loc[(pd.isna(data_csv[2]))][0].to_list()
     json_dict["no groups"] = str(no_group_sensors)
     print(json_dict)
 
@@ -95,13 +96,13 @@ def connect_sqlite(db_file):
 
 
 # Функция считывает json и выполняет объединение датчиков в dataframe
-def unite(dict, df_excel_path):
-    df = pd.read_excel(df_excel_path)
+def unite(dict, df_csv_path):
+    df = pd.read_csv(df_csv_path)
     #df.rename(columns={"External Tags": "timestamp"}, inplace=True)
     time = df["timestamp"]
     data = df.drop(columns=["timestamp"])
 
-    print(data)
+    #print(data)
     # Объединение датчиков в группы в dataframe
     delete_sensors = []
     for group in dict["groups"]:
