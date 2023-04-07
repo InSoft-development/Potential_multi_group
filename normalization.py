@@ -24,7 +24,7 @@ def normalize(df, power, path_to_save):
     sigma = data.std()
     data -= avg
     data = data / (3 * sigma)
-    print("normalized\n", data)
+    #print("normalized\n", data)
 
     # Отстройка по мощности
     models_json = {}
@@ -34,7 +34,7 @@ def normalize(df, power, path_to_save):
         regr = LinearRegression().fit(X=data[power].values.reshape(-1, 1), y=data[d].values.reshape(-1, 1))
         models_json[str(d)] = ({"k": (1 - float(regr.coef_)) / (3 * sigma[d]),
                                 "c": (avg[d] * (float(regr.coef_) - 1)) / (3 * sigma[d]) - float(regr.intercept_)})
-        print(float(regr.coef_))
+        #print(float(regr.coef_))
         data_corr[d] = regr.predict(data[power].values.reshape(-1, 1)).reshape(-1)
     data -= data_corr
 
@@ -43,7 +43,7 @@ def normalize(df, power, path_to_save):
         json.dump(models_json, f, ensure_ascii=False, indent=4)
 
     data.insert(0, "timestamp", time)
-    print(data)
+    #print(data)
     return data
 
 
@@ -54,7 +54,7 @@ def normalize_two_powers_df(df_union, station_path_1, station_path_2, approx_1, 
         len(normalize_two_powers_df.coef_1)
         len(normalize_two_powers_df.coef_2)
     except AttributeError:
-        print("read json")
+        #print("read json")
         with open(station_path_1, 'r', encoding='utf8') as f:
             coef_json_1 = json.load(f)
         normalize_two_powers_df.coef_1 = coef_json_1
@@ -89,7 +89,7 @@ def normalize_df(df_union, station_path):
     try:
         len(normalize_df.coef)
     except AttributeError:
-        print("read json")
+        #print("read json")
         with open(station_path, 'r', encoding='utf8') as f:
             coef_json = json.load(f)
         normalize_df.coef = coef_json
@@ -104,7 +104,7 @@ def normalize_row(station_path, dict_union):
     try:
         len(normalize_row.coef)
     except AttributeError:
-        print("read json")
+        #print("read json")
         with open(station_path, 'r', encoding='utf8') as f:
             coef_json = json.load(f)
         normalize_row.coef = coef_json
@@ -155,7 +155,7 @@ def normalize_multi_regress_one_powers_df(df_union, path_to_json, approx):
     try:
         len(normalize_multi_regress_one_powers_df.coef_df)
     except AttributeError:
-        print("read json")
+        #print("read json")
         with open(path_to_json, 'r', encoding='utf8') as f:
             coef_json = json.load(f)
         normalize_multi_regress_one_powers_df.coef_df = coef_json
@@ -175,21 +175,21 @@ def normalize_multi_regress_one_powers_row(dict_union, path_to_json, approx):
     try:
         len(normalize_multi_regress_one_powers_row.coef_row)
     except AttributeError:
-        print("read json")
+        #print("read json")
         with open(path_to_json, 'r', encoding='utf8') as f:
             coef_json_row = json.load(f)
         normalize_multi_regress_one_powers_row.coef_row = coef_json_row
     dict_norm['timestamp'] = dict_union['timestamp']
     for key in list(normalize_multi_regress_one_powers_row.coef_row.keys()):
-        print(dict_union[key])
+        #print(dict_union[key])
         dict_norm[key] = dict_union[key]-\
                          dict_union[approx]*normalize_multi_regress_one_powers_row.coef_row[key]['a']-\
                          normalize_multi_regress_one_powers_row.coef_row[key]['c']
-        print(dict_norm[key])
+        #print(dict_norm[key])
         dict_norm[key] -= normalize_multi_regress_one_powers_row.coef_row[key]['avg']
-        print(dict_norm[key])
+        #print(dict_norm[key])
         dict_norm[key] = dict_norm[key] / (3 * normalize_multi_regress_one_powers_row.coef_row[key]['sigma'])
-        print(dict_norm[key])
+        #print(dict_norm[key])
     return dict_norm
 
 
@@ -211,8 +211,6 @@ def normalize_multi_regress_two_powers(df_union, path_to_save, approx_1, approx_
         Y = df_union[d].to_numpy()
         X = df_union[[approx_1, approx_2]].to_numpy()
         X = np.c_[X, np.ones(X.shape[0])]
-        print(X)
-        print(Y)
         beta_hat = np.linalg.lstsq(X, Y, rcond=None)
         # Вычитаем отстройку
         df_norm[d] -= np.dot(X, beta_hat[0])

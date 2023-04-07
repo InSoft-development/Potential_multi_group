@@ -1,5 +1,3 @@
-import math
-
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
@@ -14,6 +12,10 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 import os
+
+
+DATA_DIR = f'Data'
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -61,30 +63,32 @@ def regress_lines(path_to_anomaly_time):
 def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_potentials, path_to_anomaly_time):
     df_csv = pd.read_csv(path_to_csv, usecols=['timestamp'])
     df_csv.rename(columns={'timestamp': 't'}, inplace=True)
-    df_potentials = pd.read_csv(path_to_potentials)
+    #df_potentials = pd.read_csv(path_to_potentials)
     df_probability = pd.read_csv(path_to_probability, index_col=0)
 
-    col_time = ['timestamp']
-    col_index = df_potentials.columns[df_potentials.columns.to_list().index('index0'):].to_list()
-    count_index = len(col_index)
-    col = col_time + col_index
+    #col_time = ['timestamp']
+    #col_index = df_potentials.columns[df_potentials.columns.to_list().index('index0'):].to_list()
+    #count_index = len(col_index)
+    #col = col_time + col_index
 
     #col = ['timestamp', 'index0', 'index1', 'index2', 'index3', 'index4']
-    df_probability = pd.merge(df_probability, df_potentials[col], how='inner',
-                              left_on='t', right_on='timestamp')
-    df_probability.drop(columns=['timestamp'], inplace=True)
+    # df_probability = pd.merge(df_probability, df_potentials[col], how='inner',
+    #                           left_on='t', right_on='timestamp')
+
+    #df_probability.drop(columns=['timestamp'], inplace=True)
+
+    # df_prediction_time = pd.DataFrame(
+    #     columns=['t', 'N', 'potential', 'KrP', 'P', 'anomaly_time', 'KrT', 'anomaly_date', 'index0', 'index1', 'index2',
+    #              'index3', 'index4'],
+    #     data={'t': df_csv['t']})
     df_prediction_time = pd.DataFrame(
-        columns=['t', 'N', 'potential', 'KrP', 'P', 'anomaly_time', 'KrT', 'anomaly_date', 'index0', 'index1', 'index2',
-                 'index3', 'index4'],
+        columns=['t', 'N', 'potential', 'KrP', 'P', 'anomaly_time', 'KrT', 'anomaly_date'],
         data={'t': df_csv['t']})
     end_regression = []
-    # Сглаживание вероятности
     df_csv = pd.merge(df_csv, df_probability, how='left')
     print(df_csv)
     # Сглаживание вероятности
     df_csv = rolling_probability(df_csv)
-
-    df_csv.fillna(df_csv[['potential', 'T', 'N', 'P']].mean(), inplace=True)
     print(df_csv)
 
     # Критерии по достижению вероятности и прогнозируемому времени
@@ -101,8 +105,8 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_pote
             row['P'] = df_prediction_time.iloc[index-1]['P']
             row['N'] = df_prediction_time.iloc[index-1]['N']
             row['potential'] = df_prediction_time.iloc[index-1]['potential']
-            for i in range(0, count_index):
-                row["index" + str(i)] = df_prediction_time.iloc[index-1]["index" + str(i)]
+            # for i in range(0, count_index):
+            #     row["index" + str(i)] = df_prediction_time.iloc[index-1]["index" + str(i)]
             delta_tau_P = 0
             delta_tau_T = 0
             freeze = True
@@ -111,8 +115,8 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_pote
         df_prediction_time.iloc[index]['P'] = row['P']
         df_prediction_time.iloc[index]['N'] = row['N']
         df_prediction_time.iloc[index]['potential'] = row['potential']
-        for i in range(0, count_index):
-            df_prediction_time.iloc[index]["index" + str(i)] = row["index" + str(i)]
+        # for i in range(0, count_index):
+        #     df_prediction_time.iloc[index]["index" + str(i)] = row["index" + str(i)]
         # если уже в аномалии
         if row['P'] >= config_json['model']['P_pr'] * 100:
             print(row['t'], row['P'], "ANOMALY")
@@ -193,7 +197,8 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_pote
                 print(row['t'], row['P'], "Window...")
     end = time.time() - start
     # сохранение коэффициентов в json
-    path_to_save_models = str(group) + os.sep + config_json['paths']['files']['save_models_intercept']
+    path_to_save_models = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                          f"{config_json['paths']['files']['save_models_intercept']}{group}.json"
     with open(path_to_save_models, 'w', encoding='utf8') as f:
         json.dump(models_json, f, ensure_ascii=False, indent=4)
 
@@ -283,17 +288,20 @@ if __name__ == '__main__':
         config_json = json.load(j)
     if len(sys.argv) == 1:
         print("config SOCHI")
-        path_to_csv = config_json['paths']['files']['original_csv']
-        with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
+        path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
+        with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
         index_group = [list(x.keys())[0] for x in json_dict["groups"]]
         if index_group[0] == '0':
             index_group.remove('0')
         for group in index_group:
-            path_to_probability = str(group) + os.sep + config_json['paths']['files']['probability_csv']
-            path_to_potentials = str(group) + os.sep + config_json['paths']['files']['potentials_csv']
-            path_to_anomaly_time = str(group) + os.sep + config_json['paths']['files']['anomaly_time_intercept']
+            path_to_probability = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                  f"{config_json['paths']['files']['probability_csv']}{group}.csv"
+            path_to_potentials = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                 f"{config_json['paths']['files']['potentials_csv']}{group}.csv"
+            path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                   f"{config_json['paths']['files']['anomaly_time_intercept']}{group}.csv"
             calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_potentials, path_to_anomaly_time)
     else:
         print("command's line arguments")

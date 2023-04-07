@@ -6,6 +6,9 @@ import pandas as pd
 import os
 
 
+DATA_DIR = f'Data'
+
+
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("path_to_anomaly_time", nargs=1, help="path to CSV file with anomaly date")
@@ -75,8 +78,13 @@ def interval_group(group):
             }
             dict_list.append(dictionary)
             jT = 0
+    # try:
+    #     os.mkdir("json_interval")
+    # except Exception as e:
+    #     print(e)
+    #     print('Directory exist')
     try:
-        os.mkdir("json_interval")
+        os.mkdir(f"{DATA_DIR}{os.sep}json_interval{os.sep}")
     except Exception as e:
         print(e)
         print('Directory exist')
@@ -91,50 +99,50 @@ def mean_index(data, top_count=3):
 
 
 # Игра в бисер - определение датчиков, внесших max вклада в аномалию
-def max_index(group, data):
-    with open(path_to_index_sensors + str(group) + ".json", 'r', encoding='utf8') as j:
-        index_sensors_json = json.load(j)
-    print(index_sensors_json)
-
-    sum_index = {}
-    for i in data["index0"]:
-        if i in sum_index:
-            sum_index[i] += 3
-        else:
-            sum_index[i] = 3
-
-    for i in data["index1"]:
-        if i in sum_index:
-            sum_index[i] += 2
-        else:
-            sum_index[i] = 2
-
-    for i in data["index2"]:
-        if i in sum_index:
-            sum_index[i] += 1
-        else:
-            sum_index[i] = 1
-
-    for i in data["index3"]:
-        if i in sum_index:
-            sum_index[i] += 1
-        else:
-            sum_index[i] = 1
-
-    for i in data["index4"]:
-        if i in sum_index:
-            sum_index[i] += 1
-        else:
-            sum_index[i] = 1
-    print(sum_index)
-    sorted_i = list(dict(sorted(sum_index.items(), key=lambda item: item[1], reverse=True)).keys())
-    top = []
-    print(sorted_i)
-    for i in sorted_i[0:3]:
-        print(i)
-        print(index_sensors_json[str(int(i))])
-        top.append(index_sensors_json[str(int(i))])
-    return top
+# def max_index(group, data):
+#     with open(path_to_index_sensors + str(group) + ".json", 'r', encoding='utf8') as j:
+#         index_sensors_json = json.load(j)
+#     print(index_sensors_json)
+#
+#     sum_index = {}
+#     for i in data["index0"]:
+#         if i in sum_index:
+#             sum_index[i] += 3
+#         else:
+#             sum_index[i] = 3
+#
+#     for i in data["index1"]:
+#         if i in sum_index:
+#             sum_index[i] += 2
+#         else:
+#             sum_index[i] = 2
+#
+#     for i in data["index2"]:
+#         if i in sum_index:
+#             sum_index[i] += 1
+#         else:
+#             sum_index[i] = 1
+#
+#     for i in data["index3"]:
+#         if i in sum_index:
+#             sum_index[i] += 1
+#         else:
+#             sum_index[i] = 1
+#
+#     for i in data["index4"]:
+#         if i in sum_index:
+#             sum_index[i] += 1
+#         else:
+#             sum_index[i] = 1
+#     print(sum_index)
+#     sorted_i = list(dict(sorted(sum_index.items(), key=lambda item: item[1], reverse=True)).keys())
+#     top = []
+#     print(sorted_i)
+#     for i in sorted_i[0:3]:
+#         print(i)
+#         print(index_sensors_json[str(int(i))])
+#         top.append(index_sensors_json[str(int(i))])
+#     return top
 
 
 if __name__ == '__main__':
@@ -146,7 +154,7 @@ if __name__ == '__main__':
         print("config SOCHI")
         print("Enter 0 for choose anomaly_time_prob frame\nEnter 1 for choose anomaly_time_intercept frame")
         input_anomaly_file = input()
-        with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
+        with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
         index_group = [list(x.keys())[0] for x in json_dict["groups"]]
@@ -154,13 +162,18 @@ if __name__ == '__main__':
             index_group.remove('0')
         for group in index_group:
             if int(input_anomaly_file) == 0:
-                path_to_anomaly_time = str(group) + os.sep + config_json['paths']['files']['anomaly_time_prob']
+                path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                       f"{config_json['paths']['files']['anomaly_time_prob']}{group}.csv"
             if int(input_anomaly_file) == 1:
-                path_to_anomaly_time = str(group) + os.sep + config_json['paths']['files']['anomaly_time_intercept']
-            path_to_loss = str(group) + os.sep + config_json['paths']['files']['loss_csv']
-            path_to_threshold_json = str(group) + os.sep + config_json['paths']['files']['threshold_json']
-            path_to_index_sensors = config_json['paths']['files']['index_sensors_json'] + str(group)+".json"
-            path_to_intervals_json = config_json['paths']['files']['intervals_json'] + str(group) + ".json"
+                path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                       f"{config_json['paths']['files']['anomaly_time_intercept']}{group}.csv"
+            path_to_loss = f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv"
+            path_to_threshold_json = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                     f"{config_json['paths']['files']['threshold_json']}{group}.json"
+            path_to_index_sensors = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                    f"{config_json['paths']['files']['index_sensors_json']}{group}.json"
+            path_to_intervals_json = f"{DATA_DIR}{os.sep}json_interval{os.sep}" \
+                                     f"{config_json['paths']['files']['intervals_json']}{group}.json"
             interval_group(str(group))
     else:
         print("command's line arguments")

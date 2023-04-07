@@ -7,6 +7,8 @@ import sqlite3
 import pandas as pd
 import time
 
+DATA_DIR = f'Data'
+
 nums = []
 points = {}
 
@@ -15,7 +17,7 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("file_json", nargs=1, help="json file with unions and sensors")
     parser.add_argument("row_data", nargs=1, help="path of input sqlite file with normalized rows of data")
-    parser.add_argument("row_data_with_power", nargs=1, help="path of input excel with unnormalized rows of data")
+    parser.add_argument("row_data_with_power", nargs=1, help="path of input csv with unnormalized rows of data")
     parser.add_argument("group", nargs=1, help="number of sensor's group")
     parser.add_argument("path_to_points", nargs=1, help="path to files which contained points")
     parser.add_argument("path_to_index_sensors", nargs=1, help="path to json files which contained index|sensors->nums")
@@ -93,11 +95,12 @@ def potentials_analyse(data):
     #
     #sum_num = sum_num / len(points)
     #print(sum_num)
-    sorted_indexes = sorted(sum_num, key=sum_num.get, reverse=True)
+    #sorted_indexes = sorted(sum_num, key=sum_num.get, reverse=True)
     # print(sorted_indexes)
     # print(sorted_indexes[0:5])
-    sorted_numbers = [list(nums).index(i) for i in sorted_indexes[0:5]]
-    return sum_p, sorted_numbers, sum_num
+    #sorted_numbers = [list(nums).index(i) for i in sorted_indexes[0:5]]
+    #return sum_p, sorted_numbers, sum_num
+    return sum_p, sum_num
 
 
 def analyse_loop_month_one_powers(file_name, file_power):
@@ -105,7 +108,7 @@ def analyse_loop_month_one_powers(file_name, file_power):
     # DataFrame с необъединенными и ненормализованными данными
     con = sqlite3.connect(file_name)
     df = pd.read_sql_query("SELECT * from data", con)
-    df_power = pd.read_excel(file_power, sheet_name="slices")
+    df_power = pd.read_csv(file_power)
     #print(df.head())
 
     anomaly = []
@@ -121,14 +124,11 @@ def analyse_loop_month_one_powers(file_name, file_power):
     N = len(df.index)
     #print("N = ", N)
 
-    if not os.path.exists(str(group)):
-        os.mkdir(str(group))
-
     for index, row in df.iterrows():
         temp_row = row.to_dict()
         # Суммарный потенциал и индексы 5-ти "наибольших" центров
         #
-        a, s, loss = potentials_analyse(temp_row)
+        a, loss = potentials_analyse(temp_row)
         #
         #print("a = ", a, "s = ", s)
         # Значение мощности
@@ -144,8 +144,8 @@ def analyse_loop_month_one_powers(file_name, file_power):
         rotor.append(r)  # добавление в массив значения датчика мощности
 
         # Проход по "наибольшим" центрам
-        for i in range(0, len(s) if len(s) < 5 else 5):
-            anomaly_index[i].append(s[i])  # добавление в массив индексов "наибольших" центров
+        # for i in range(0, len(s) if len(s) < 5 else 5):
+        #     anomaly_index[i].append(s[i])  # добавление в массив индексов "наибольших" центров
 
         # добавляем дату
         t.append(row["timestamp"])
@@ -160,13 +160,13 @@ def analyse_loop_month_one_powers(file_name, file_power):
     df = pd.DataFrame({'timestamp': t,
                        'potential': anomaly,
                        'N': rotor})
-    for i in range(0, len(s) if len(s) < 5 else 5):
-        df['index' + str(i)] = anomaly_index[i]
-    df.to_csv(str(group) + "/" + config_json['paths']['files']['potentials_csv'], index=False)
+    # for i in range(0, len(s) if len(s) < 5 else 5):
+    #     df['index' + str(i)] = anomaly_index[i]
+    df.to_csv(f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['potentials_csv']}{group}.csv", index=False)
 
     df_loss = pd.DataFrame(data=loss)
     df_loss['timestamp'] = t
-    df_loss.to_csv(str(group) + "/" + config_json['paths']['files']['loss_csv'], index=False)
+    df_loss.to_csv(f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv", index=False)
 
 
 def analyse_loop_month_two_powers(file_name, file_power):
@@ -174,7 +174,7 @@ def analyse_loop_month_two_powers(file_name, file_power):
     # DataFrame с необъединенными и ненормализованными данными
     con = sqlite3.connect(file_name)
     df = pd.read_sql_query("SELECT * from data", con)
-    df_power = pd.read_excel(file_power, sheet_name="slices")
+    df_power = pd.read_csv(file_power)
     #print(df.head())
 
     anomaly = []
@@ -192,13 +192,10 @@ def analyse_loop_month_two_powers(file_name, file_power):
     N = len(df.index)
     #print("N = ", N)
 
-    if not os.path.exists(str(group)):
-        os.mkdir(str(group))
-
     for index, row in df.iterrows():
         temp_row = row.to_dict()
         # Суммарный потенциал и индексы 5-ти "наибольших" центров
-        a, s, loss = potentials_analyse(temp_row)
+        a, loss = potentials_analyse(temp_row)
         #print("a = ", a, "s = ", s)
         # Значение мощности
         r_1 = df_power.iloc[index][power[0]]
@@ -216,8 +213,8 @@ def analyse_loop_month_two_powers(file_name, file_power):
         rotor_2.append(r_2)
 
         # Проход по "наибольшим" центрам
-        for i in range(0, len(s) if len(s) < 5 else 5):
-            anomaly_index[i].append(s[i])  # добавление в массив индексов "наибольших" центров
+        # for i in range(0, len(s) if len(s) < 5 else 5):
+        #     anomaly_index[i].append(s[i])  # добавление в массив индексов "наибольших" центров
 
         # добавляем дату
         t.append(row["timestamp"])
@@ -234,13 +231,13 @@ def analyse_loop_month_two_powers(file_name, file_power):
                        'potential': anomaly,
                        'T': rotor_1,
                        'N': rotor_2})
-    for i in range(0, len(s) if len(s) < 5 else 5):
-        df['index' + str(i)] = anomaly_index[i]
-    df.to_csv(str(group) + "/" + config_json['paths']['files']['potentials_csv'], index=False)
+    # for i in range(0, len(s) if len(s) < 5 else 5):
+    #     df['index' + str(i)] = anomaly_index[i]
+    df.to_csv(f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['potentials_csv']}{group}.csv", index=False)
 
     df_loss = pd.DataFrame(data=loss_list)
     df_loss['timestamp'] = t
-    df_loss.to_csv(str(group) + "/" + config_json['paths']['files']['loss_csv'], index=False)
+    df_loss.to_csv(f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv", index=False)
 
 
 def period_analyse():
@@ -261,11 +258,11 @@ if __name__ == '__main__':
         config_json = json.load(j)
     if len(sys.argv) == 1:
         print("config SOCHI")
-        file_json = config_json['paths']['files']['json_sensors']
+        file_json = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}"
         power = config_json['model']['approx_sensors']
-        row_data = config_json['paths']['files']['sqlite_norm']
-        row_data_with_power = config_json['paths']['files']['excel_df']
-        with open(config_json['paths']['files']['json_sensors'], 'r', encoding='utf8') as f:
+        row_data = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['sqlite_norm']}"
+        row_data_with_power = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
+        with open(file_json, 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
         index_group = [list(x.keys())[0] for x in json_dict["groups"]]
@@ -273,8 +270,10 @@ if __name__ == '__main__':
             index_group.remove('0')
         print(index_group)
         for group in index_group:
-            path_to_points = config_json['paths']['files']['points_json'] + str(group) + ".json"
-            path_to_index_sensors = config_json['paths']['files']['index_sensors_json'] + str(group) + ".json"
+            path_to_points = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                             f"{config_json['paths']['files']['points_json']}{str(group)}.json"
+            path_to_index_sensors = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                    f"{config_json['paths']['files']['index_sensors_json']}{str(group)}.json"
             t_sum = 0
             start_group = time.time()
             period_analyse()
