@@ -30,31 +30,27 @@
 	  "files":{
 		  "original_csv": "slices.csv",
 		  "original_kks": "kks_with_groups.csv",
-		  "excel_sensors": "sensors.xlsx",
+		  "csv_sensors": "sensors.csv",
 		  "json_sensors": "sensors.json",
-		  "excel_df": "slices_GT.xlsx",
-		  "excel_df_train": "slices_GT_train.xlsx",
-		  "coef_train_json": "slices_GT_coef_train.json",
-		  "sqlite_norm": "slices_GT_norm.sqlite",
+		  "csv_truncate_by_power": "slices_truncate.csv",
+		  "csv_train": "slices_train.csv",
+		  "coef_train_json": "slices_coef_train.json",
+		  "sqlite_norm": "slices_norm.sqlite",
 		  "points_json": "points_",
 		  "index_sensors_json": "index_sensors_",
-		  "potentials_csv": "potential.csv",
-		  "loss_csv": "loss.csv",
-		  "probability_csv": "probability_stat.csv",
-		  "table_potential_probability": "potential_probability.csv",
-		  "threshold_json": "threshold.json",
-		  "anomaly_time_prob": "time_to_anomaly_prob.csv",
-		  "save_models_prob": "models_regression_prob.json",
-		  "anomaly_time_intercept": "time_to_anomaly_intercept.csv",
-		  "save_models_intercept": "models_regression_intercept.json",
-		  "intervals_json": "json_interval/group_"
+		  "potentials_csv": "potential_",
+		  "loss_csv": "loss_",
+		  "probability_csv": "probability_stat_",
+		  "table_potential_probability": "potential_probability_",
+		  "threshold_json": "threshold_",
+		  "anomaly_time_prob": "time_to_anomaly_prob_",
+		  "save_models_prob": "models_regression_prob_",
+		  "anomaly_time_intercept": "time_to_anomaly_intercept_",
+		  "save_models_intercept": "models_regression_intercept_",
+		  "intervals_json": "group_"
 	  },
 	  "graphs":{
-		  "hist_potential_probability": "hist_potential_probability.png",
-		  "scale_potential": "scale_potential.png",
-		  "scale_power": "scale_power.png",
-		  "scale_potential_week": "scale_potential_week.png",
-		  "scale_power_week": "scale_power_week.png"
+		  "hist_potential_probability": "hist_potential_probability_"
 	  }
   }
 }
