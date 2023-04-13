@@ -3,10 +3,20 @@ import numpy as np
 import json
 import sqlite3
 
+import clickhouse_connect
 
 # Функция сериализует и записывает json c выделенными union
-def json_build(file_csv, path_to_save, sheet='SOCHI'):
-    data_csv = pd.read_csv(file_csv, delimiter=';', header=None)
+def json_build(path_to_save, sheet='SOCHI'):
+    #data_csv = pd.read_csv(file_csv, delimiter=';', header=None)
+    client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
+    data_csv = client.query_df(f'SELECT * FROM kks')
+    data_csv.rename(columns={'kks': 0, 'name': 1, 'group': 2}, inplace=True)
+    data_csv[2] = data_csv[2].astype('int64')
+    data_csv[2] = data_csv[2].astype('string')
+
+    data_group = client.query_df(f'SELECT * FROM groups')
+    print(data_group)
+
     if 3 not in data_csv.columns.to_list():
         data_csv[3] = np.NaN
     json_dict = {
@@ -30,6 +40,7 @@ def json_build(file_csv, path_to_save, sheet='SOCHI'):
     for group in unique_group:
         group_dict = {
             str(int(group)): {
+                "name": data_group.iloc[int(group)]['name'],
                 "unions": "null",
                 "single sensors": "null"
             }

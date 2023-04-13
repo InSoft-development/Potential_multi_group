@@ -13,8 +13,6 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("path_to_anomaly_time", nargs=1, help="path to CSV file with anomaly date")
     parser.add_argument("path_to_loss", nargs=1, help="path to CSV file with loss")
-    parser.add_argument("path_to_threshold", nargs=1, help="path to json with thresholds")
-    parser.add_argument("path_to_index_sensors", nargs=1, help="path to json files which contained index|sensors")
     parser.add_argument("path_to_intervals_json", nargs=1, help="path to saving json file with anomalies intervals")
     return parser
 
@@ -168,10 +166,6 @@ if __name__ == '__main__':
                 path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
                                        f"{config_json['paths']['files']['anomaly_time_intercept']}{group}.csv"
             path_to_loss = f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv"
-            path_to_threshold_json = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                     f"{config_json['paths']['files']['threshold_json']}{group}.json"
-            path_to_index_sensors = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                    f"{config_json['paths']['files']['index_sensors_json']}{group}.json"
             path_to_intervals_json = f"{DATA_DIR}{os.sep}json_interval{os.sep}" \
                                      f"{config_json['paths']['files']['intervals_json']}{group}.json"
             interval_group(str(group))
@@ -180,8 +174,6 @@ if __name__ == '__main__':
         namespace = parser.parse_args()
         path_to_anomaly_time = namespace.path_to_anomaly_time[0]
         path_to_loss = namespace.path_to_loss[0]
-        path_to_threshold_json = namespace.path_to_threshold[0]
-        path_to_index_sensors = namespace.path_to_index_sensors[0]
         path_to_intervals_json = namespace.path_to_intervals_json[0]
         for g in range(1, config_json['count_of_groups']+1):
             interval_group(str(g))

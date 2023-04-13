@@ -25,13 +25,13 @@ def prepare_train_multi_regress():
     # Сохранение файла json с маркированными датчиками
     path_save_json = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}"
 
-    path_kks = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_kks']}"
-    df_original_kks = pd.read_csv(path_kks, delimiter=';', header=None)
-    df_original_kks = df_original_kks[~(df_original_kks[0].isin(blacklist))]
-    print(df_original_kks)
+    # path_kks = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_kks']}"
+    # df_original_kks = pd.read_csv(path_kks, delimiter=';', header=None)
+    # df_original_kks = df_original_kks[~(df_original_kks[0].isin(blacklist))]
+    # print(df_original_kks)
 
     # Объединение датчиков и их нормализация с отстройками по мощностям и отсечка по уровню мощности
-    union.json_build(path_kks, path_save_json)
+    union.json_build(path_save_json)
     path_truncate_power_df = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
     path_train_df = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_train']}"
     df_original = df_original.loc[df_original[approxlist[len(approxlist)-1]] > config_json['model']['N']]

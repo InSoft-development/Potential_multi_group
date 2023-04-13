@@ -48,11 +48,6 @@ def kks_load():
                     nums.append(element["name"] + "_mean_" + str(index_group))
         if unions["single sensors"] != "null":
             [nums.append(x) for x in unions["single sensors"] if x not in power]
-    index_sensors_json = {}
-    for i in range(0, len(nums)):
-        index_sensors_json[str(i)] = nums[i]
-    with open(path_to_index_sensors, 'w', encoding='utf8') as f:
-        json.dump(index_sensors_json, f, ensure_ascii=False, indent=4)
     #print("Sensors in group\n", nums)
     return True
 
@@ -272,8 +267,6 @@ if __name__ == '__main__':
         for group in index_group:
             path_to_points = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
                              f"{config_json['paths']['files']['points_json']}{str(group)}.json"
-            path_to_index_sensors = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                    f"{config_json['paths']['files']['index_sensors_json']}{str(group)}.json"
             t_sum = 0
             start_group = time.time()
             period_analyse()
