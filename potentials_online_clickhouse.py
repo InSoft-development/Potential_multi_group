@@ -311,8 +311,8 @@ if __name__ == '__main__':
 
         regress_prob[group] = []
         index[group] = 0
-    # regress_days = config_json['model']['delta'] * config_json['number_of_samples']  # окно - период
-    regress_days = 1 * config_json['number_of_samples']  # окно - 1 минута
+    regress_days = config_json['model']['delta'] * config_json['number_of_samples']  # окно - период
+    # regress_days = 1 * config_json['number_of_samples']  # окно - 1 минута
     # regress_days = 3  # окно - 15 секунд
     if config_json["create_online_table"] == 1:
         create_online_table()

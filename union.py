@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import json
 import sqlite3
-
 import clickhouse_connect
+
 
 # Функция сериализует и записывает json c выделенными union
 def json_build(path_to_save, sheet='SOCHI'):
