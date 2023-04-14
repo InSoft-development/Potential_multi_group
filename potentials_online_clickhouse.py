@@ -118,10 +118,13 @@ def online_sochi():
                     potential = penult_predict_row['potential'].values[0]
                     prob = penult_predict_row['probability'].values[0]
                     penult_loss_row.drop(columns='timestamp', inplace=True)
+
                     loss = penult_loss_row
-                    loss = loss.to_dict('records')
+                    loss = loss.to_dict('records')[0]
+
                     delta_tau_P[group] = 0
                     delta_tau_T[group] = 0
+
                     print("Замороженные значения")
                     print("Потенциал = ", potential)
                     print("loss", loss)
@@ -168,7 +171,7 @@ def online_sochi():
                         regress_prob[group] = regress_prob_rows['probability'].to_list()
                         x = np.array(range(index[group]-regress_days, index[group], config_json['model']['s'])).reshape(
                             (-1, 1))  # x в окне
-                        #y = np.array(regress_prob[group][index[group] - regress_days:index[group]:config_json['model']['s']])  # вероятность
+                        # y = np.array(regress_prob[group][index[group] - regress_days:index[group]:config_json['model']['s']])  # вероятность
                         y = np.array(regress_prob[group])  # вероятность
                         model = LinearRegression().fit(x, y)
                         root = (config_json['model']['P_pr'] * 100 - model.intercept_) / model.coef_[0]
@@ -210,31 +213,19 @@ def online_sochi():
                 print("Время до аномалии: ", anomaly_time)
                 # Сохранение в БД таблиц loss по группам
 
-                # col_str = ''
-                # for col in loss:
-                #     col_str += '"' + col + '"' + ' ' + 'Float64, '
-                # col_str += '"' + 'timestamp' + '"' + ' ' + 'DateTime64'
-
                 loss_df = [loss]
                 loss_df = pd.DataFrame(loss_df)
                 loss_df['timestamp'] = last_row['timestamp']
 
-                # client.command(f'DROP TABLE IF EXISTS potential_loss_{group}')
-                # client.command(f'CREATE TABLE potential_loss_{group} ({col_str}) ENGINE = Memory')
                 client.insert_df(f'potential_loss_{group}', loss_df)
                 # Достаем для проверки из БД добавленную строчку loss
                 new_loss_records = client.query_df(f"SELECT * FROM potential_loss_{group}").tail(1)
-                #print(new_loss_records)
-                # Сохранение в БД потенциала, вероятности и времени до аномалии
-                # col_str = 'potential Float64, probability Float64, anomaly_time String,' \
-                #           'KrP Boolean, KrT Boolean, timestamp DateTime64'
+
                 predict_df = pd.DataFrame({'potential': potential, 'probability': prob,
                                            'anomaly_time': str(anomaly_time),
                                            'KrP': bool(KrP[group]), 'KrT': bool(KrT[group]),
                                            'timestamp': last_row['timestamp']})
 
-                # client.command(f'DROP TABLE IF EXISTS potential_predict_{group}')
-                # client.command(f'CREATE TABLE potential_predict_{group} ({col_str}) ENGINE = Memory')
                 client.insert_df(f'potential_predict_{group}', predict_df)
 
                 # Достаем для проверки из БД добавленную строчку predict
@@ -242,6 +233,33 @@ def online_sochi():
                 print(new_predict_records)
 
             time.sleep(5)
+    finally:
+        client.close()
+        print("disconnected")
+
+
+def create_online_table():
+    client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
+    try:
+        # Цикл создания таблиц по группам
+        for group in index_group:
+            print("group = ", group)
+            # Создание в БД таблиц loss по группам
+
+            col_str = ''
+            for col in nums[group]:
+                col_str += '"' + col + '"' + ' ' + 'Float64, '
+            col_str += '"' + 'timestamp' + '"' + ' ' + 'DateTime64'
+
+            client.command(f'DROP TABLE IF EXISTS potential_loss_{group}')
+            client.command(f'CREATE TABLE potential_loss_{group} ({col_str}) ENGINE = Memory')
+
+            # Создание в БД таблицы под потенциал, вероятность и время до аномалии
+
+            col_str = 'potential Float64, probability Float64, anomaly_time String,' \
+                      'KrP Boolean, KrT Boolean, timestamp DateTime64'
+            client.command(f'DROP TABLE IF EXISTS potential_predict_{group}')
+            client.command(f'CREATE TABLE potential_predict_{group} ({col_str}) ENGINE = Memory')
     finally:
         client.close()
         print("disconnected")
@@ -296,4 +314,6 @@ if __name__ == '__main__':
     # regress_days = config_json['model']['delta'] * config_json['number_of_samples']  # окно - период
     regress_days = 1 * config_json['number_of_samples']  # окно - 1 минута
     # regress_days = 3  # окно - 15 секунд
+    if config_json["create_online_table"] == 1:
+        create_online_table()
     online_sochi()

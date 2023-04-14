@@ -3,6 +3,7 @@
   "project_name": "SOCHI",
   "count_of_groups": 11,
   "number_of_samples": 12,
+  "create_online_table": 0,
   "model":{
     "N": 19,
     "blacklist_sensors": [
