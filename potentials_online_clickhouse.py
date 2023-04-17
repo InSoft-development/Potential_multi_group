@@ -219,7 +219,7 @@ def online_sochi():
 
                 client.insert_df(f'potential_loss_{group}', loss_df)
                 # Достаем для проверки из БД добавленную строчку loss
-                new_loss_records = client.query_df(f"SELECT * FROM potential_loss_{group}").tail(1)
+                #new_loss_records = client.query_df(f"SELECT * FROM potential_loss_{group} order by timestamp desc limit 1").tail(1)
 
                 predict_df = pd.DataFrame({'potential': potential, 'probability': prob,
                                            'anomaly_time': str(anomaly_time),
@@ -229,7 +229,7 @@ def online_sochi():
                 client.insert_df(f'potential_predict_{group}', predict_df)
 
                 # Достаем для проверки из БД добавленную строчку predict
-                new_predict_records = client.query_df(f'SELECT * FROM potential_predict_{group}').tail(5)
+                new_predict_records = client.query_df(f'SELECT * FROM potential_predict_{group} order by timestamp desc limit 5').tail(5)
                 print(new_predict_records)
 
             time.sleep(5)
