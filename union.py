@@ -1,20 +1,37 @@
 import pandas as pd
 import numpy as np
 import json
+import os
 import sqlite3
 import clickhouse_connect
 
 
 # Функция сериализует и записывает json c выделенными union
-def json_build(path_to_save, sheet='SOCHI'):
-    #data_csv = pd.read_csv(file_csv, delimiter=';', header=None)
-    client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
-    data_csv = client.query_df(f'SELECT * FROM kks')
-    data_csv.rename(columns={'kks': 0, 'name': 1, 'group': 2}, inplace=True)
-    data_csv[2] = data_csv[2].astype('int64')
-    data_csv[2] = data_csv[2].astype('string')
-
-    data_group = client.query_df(f'SELECT * FROM groups')
+def json_build(source, config, path_to_save, sheet='SOCHI'):
+    if source == "clickhouse":
+        client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
+        data_csv = client.query_df(f"{config['paths']['database']['clickhouse']['original_kks_query']}")
+        data_csv.rename(columns={'kks': 0, 'name': 1, 'group': 2}, inplace=True)
+        data_csv[2] = data_csv[2].astype('int64')
+        data_csv[2] = data_csv[2].astype('string')
+        data_group = client.query_df(f"{config['paths']['database']['clickhouse']['original_group_query']}")
+        client.close()
+    elif source == "sqlite":
+        client = sqlite3.connect(f"{config['paths']['database']['sqlite']['original_kks']}")
+        data_csv = pd.read_sql_query(f"{config['paths']['database']['sqlite']['original_kks_query']}", client)
+        data_csv.rename(columns={'kks': 0, 'name': 1, 'group': 2}, inplace=True)
+        data_csv[2] = data_csv[2].astype('int64')
+        data_csv[2] = data_csv[2].astype('string')
+        client.close()
+        client = sqlite3.connect(f"{config['paths']['database']['sqlite']['original_group']}")
+        data_group = pd.read_sql_query(f"{config['paths']['database']['sqlite']['original_group_query']}", client)
+        client.close()
+    else:
+        DATA_DIR = f'Data'
+        path_to_original_kks = f"{DATA_DIR}{os.sep}{config['paths']['files']['original_kks']}"
+        path_to_original_group_csv = f"{DATA_DIR}{os.sep}{config['paths']['files']['original_group_csv']}"
+        data_csv = pd.read_csv(path_to_original_kks, delimiter=';', header=None)
+        data_group = pd.read_csv(path_to_original_group_csv, delimiter=';', header=None)
     print(data_group)
 
     if 3 not in data_csv.columns.to_list():

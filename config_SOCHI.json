@@ -4,6 +4,7 @@
   "count_of_groups": 11,
   "number_of_samples": 12,
   "create_online_table": 0,
+  "source_input_data": "csv",
   "model":{
     "N": 19,
     "blacklist_sensors": [
@@ -31,6 +32,7 @@
 	  "files":{
 		  "original_csv": "slices.csv",
 		  "original_kks": "kks_with_groups.csv",
+		  "original_group_csv": "groups.csv",
 		  "json_sensors": "sensors.json",
 		  "csv_truncate_by_power": "slices_truncate.csv",
 		  "csv_train": "slices_train.csv",
@@ -47,6 +49,21 @@
 		  "anomaly_time_intercept": "time_to_anomaly_intercept_",
 		  "save_models_intercept": "models_regression_intercept_",
 		  "intervals_json": "group_"
+	  },
+	  "database":{
+		  "clickhouse":{
+			  "original_csv_query": "SELECT * FROM slices order by timestamp",
+			  "original_kks_query": "SELECT * FROM kks",
+			  "original_group_query": "SELECT * FROM groups"
+		  },
+		  "sqlite":{
+			  "original_csv": "slices.sqlite",
+			  "original_csv_query": "SELECT * FROM slices order by timestamp",
+			  "original_kks": "kks_with_groups.sqlite",
+			  "original_kks_query": "SELECT * FROM kks",
+			  "original_group": "groups.sqlite",
+			  "original_group_query": "SELECT * FROM groups"
+		  }
 	  },
 	  "graphs":{
 		  "hist_potential_probability": "hist_potential_probability_"
