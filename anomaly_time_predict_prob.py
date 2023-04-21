@@ -41,11 +41,17 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
         print("source from clickhouse")
         client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
         df_csv = client.query_df(f"{config_json['paths']['database']['clickhouse']['original_csv_query']}")
+        df_csv = df_csv['timestamp']
+        df_csv = pd.DataFrame(df_csv, columns=['timestamp'])
+        df_csv['timestamp'] = df_csv['timestamp'].astype('object')
         client.close()
     elif source_data == "sqlite":
         print("source from sqlite")
         client = sqlite3.connect(f"{config_json['paths']['database']['sqlite']['original_csv']}")
         df_csv = pd.read_sql_query(f"{config_json['paths']['database']['sqlite']['original_csv_query']}", client)
+        df_csv = df_csv['timestamp']
+        df_csv = pd.DataFrame(df_csv, columns=['timestamp'])
+        df_csv['timestamp'] = df_csv['timestamp'].astype('object')
         client.close()
     elif source_data == "csv":
         print("source from csv")
@@ -53,12 +59,11 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
     else:
         print("complete field source_input_data in config (possible value: clickhouse, sqlite, csv) and rerun script")
         exit(0)
-    df_csv.rename(columns={'timestamp': 't'}, inplace=True)
     df_probability = pd.read_csv(path_to_probability, index_col=0)
 
     df_prediction_time = pd.DataFrame(
-        columns=['t', 'N', 'potential', 'KrP', 'P', 'anomaly_time', 'KrT', 'anomaly_date'],
-        data={'t': df_csv['t']})
+        columns=['timestamp', 'N', 'potential', 'KrP', 'P', 'anomaly_time', 'KrT', 'anomaly_date'],
+        data={'timestamp': df_csv['timestamp']})
     end_regression = []
 
     df_csv = pd.merge(df_csv, df_probability, how='left')
@@ -93,9 +98,9 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
 
         # если уже в аномалии
         if row['P'] >= config_json['model']['P_pr'] * 100:
-            print(row['t'], row['P'], "ANOMALY")
+            print(row['timestamp'], row['P'], "ANOMALY")
             df_prediction_time.iloc[index]['anomaly_time'] = "0"
-            df_prediction_time.iloc[index]['anomaly_date'] = row['t'][:len(row['t']) - 3]
+            df_prediction_time.iloc[index]['anomaly_date'] = row['timestamp'][:len(row['timestamp']) - 3]
 
             # Критерий по достижению вероятности
             delta_tau_P += 1
@@ -125,7 +130,7 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
                 start_regression = time.time()
                 model = LinearRegression().fit(x, y)
                 end_regression.append(time.time() - start_regression)
-                models_json[row['t']] = ({"k": model.coef_[0], "b": model.intercept_})
+                models_json[row['timestamp']] = ({"k": model.coef_[0], "b": model.intercept_})
                 root = (config_json['model']['P_pr'] * 100 - df_csv.iloc[index]['P']) / model.coef_[0]  # нахождение корня. Вероятность = 95%
                 print("work regression")
                 # если лин коэф положительный и корень раньше, чем через 3 месяца
@@ -133,7 +138,7 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
                     # Корень либо внутри окна,либо правее него
                     # если внутри окна то ноль так как рост аномалии указывал на момент времени в прошлом
                     # Аномалия могла уже наступить
-                    date_time = parse_date.parse(row['t'])
+                    date_time = parse_date.parse(row['timestamp'])
                     df_prediction_time.iloc[index]['anomaly_time'] = \
                         0.0 if max(0, root / config_json['number_of_samples']) == 0 else (root / config_json['number_of_samples'])
                     df_prediction_time.iloc[index]['anomaly_time'] = \
@@ -141,6 +146,8 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
                                 root / config_json['number_of_samples'])
                     df_prediction_time.iloc[index]['anomaly_date'] = date_time + datetime.timedelta(
                         hours=(root) / config_json['number_of_samples'])
+                    df_prediction_time.iloc[index]['anomaly_date'] = df_prediction_time.iloc[index][
+                        'anomaly_date'].strftime("%Y-%m-%d %H:%M:%S")
 
                     # Критерий по достижению прогнозируемого времени
                     if (datetime.timedelta(hours=df_prediction_time.iloc[index]['anomaly_time']) <=
@@ -154,21 +161,21 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
                     else:
                         delta_tau_T = 0
                         df_prediction_time.iloc[index]['KrT'] = "0"
-                    print(row['t'], row['P'], (root) / config_json['number_of_samples'])
+                    print(row['timestamp'], row['P'], (root) / config_json['number_of_samples'])
                 else:
                     # либо вероятно падает либо до нее > 3 месяцев
                     df_prediction_time.iloc[index]['anomaly_time'] = "NaN"
                     df_prediction_time.iloc[index]['anomaly_date'] = "NaN"
                     df_prediction_time.iloc[index]['KrT'] = "0"
                     delta_tau_T = 0
-                    print(row['t'], row['P'], "N/A")
+                    print(row['timestamp'], row['P'], "N/A")
             else:
                 # Недостаточно данных для формирования окна
                 df_prediction_time.iloc[index]['anomaly_time'] = "NaN"
                 df_prediction_time.iloc[index]['anomaly_date'] = "NaN"
                 df_prediction_time.iloc[index]['KrT'] = "0"
                 delta_tau_T = 0
-                print(row['t'], row['P'], "Window...")
+                print(row['timestamp'], row['P'], "Window...")
     end = time.time() - start
     # сохранение коэффициентов в json
     path_to_save_models = f"{DATA_DIR}{os.sep}{group}{os.sep}" \

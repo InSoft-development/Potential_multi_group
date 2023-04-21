@@ -267,14 +267,11 @@ def create_online_table():
 
 if __name__ == '__main__':
     DATA_DIR = f'Data'
-    DIR_ONLINE = f'online_mode'
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
     with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
         json_dict = json.load(f)
     N_L = config_json['model']['N_l']
-    if not os.path.exists(DIR_ONLINE):
-        os.mkdir(DIR_ONLINE)
 
     blacklist = config_json['model']['blacklist_sensors']
     approxlist = config_json['model']['approx_sensors']
