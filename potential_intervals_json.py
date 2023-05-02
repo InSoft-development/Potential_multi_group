@@ -21,15 +21,15 @@ def interval_group(group):
     print("group", group)
     df_anomaly = pd.read_csv(path_to_anomaly_time, index_col=[0])
 
-    df_anomaly['t'] = pd.to_datetime(df_anomaly['t'], format="%Y-%m-%d %H:%M:%S")
+    df_anomaly['timestamp'] = pd.to_datetime(df_anomaly['timestamp'], format="%Y-%m-%d %H:%M:%S")
     print(df_anomaly)
 
     df_loss = pd.read_csv(path_to_loss)
 
     j = 0
     jT = 0
-    d1 = df_anomaly["t"][0]
-    d1T = df_anomaly['t'][0]
+    d1 = df_anomaly["timestamp"][0]
+    d1T = df_anomaly['timestamp'][0]
     dict_list = []
     interval_begin_index = 0
     interval_begin_indexT = 0
@@ -38,11 +38,11 @@ def interval_group(group):
     for index, row in df_anomaly.iterrows():
         if row['KrP']:
             if j == 0:
-                d1 = df_anomaly['t'][index]
+                d1 = df_anomaly['timestamp'][index]
                 interval_begin_index = index
             j += 1
         if (not row['KrP']) and (j != 0):
-            d2 = df_anomaly["t"][index]
+            d2 = df_anomaly["timestamp"][index]
             print("KrP")
             print(d1, " - ", d2, "time in hours", j * 5 / 60)
             #input("Press Enter to continue...")
@@ -58,11 +58,11 @@ def interval_group(group):
             j = 0
         if row['KrT']:
             if jT == 0:
-                d1T = df_anomaly['t'][index]
+                d1T = df_anomaly['timestamp'][index]
                 interval_begin_indexT = index
             jT += 1
         if (not row['KrT']) and (jT != 0):
-            d2T = df_anomaly["t"][index]
+            d2T = df_anomaly["timestamp"][index]
             print("KrT")
             print(d1T, " - ", d2T, "time in hours", jT * 5 / 60)
             #input("Press Enter to continue...")

@@ -145,7 +145,6 @@ def normalize_multi_regress_one_powers(df_union, path_to_save, approx):
     with open(path_to_save, 'w', encoding='utf8') as f:
         json.dump(models_json, f, ensure_ascii=False, indent=4)
     df_norm.insert(0, "timestamp", time)
-    return df_norm
 
 
 # Функция выполняет отстройку и нормализацию всего датафрейма union объединения по
@@ -226,7 +225,6 @@ def normalize_multi_regress_two_powers(df_union, path_to_save, approx_1, approx_
     with open(path_to_save, 'w', encoding='utf8') as f:
         json.dump(models_json, f, ensure_ascii=False, indent=4)
     df_norm.insert(0, "timestamp", time)
-    return df_norm
 
 
 # Функция выполняет отстройку и нормализацию всего датафрейма union объединения по

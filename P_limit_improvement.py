@@ -33,7 +33,7 @@ def p_limit_one_power(power_sensor):
     t = df_potential['timestamp'].tolist()  # Массив временных отсчетов
     a = df_potential['potential'].tolist()  # Массив значений потенциалов
 
-    data = pd.DataFrame({"t": t, "potential": a, "N": rotor})
+    data = pd.DataFrame({"timestamp": t, "potential": a, "N": rotor})
 
     #data_train = data.loc[1:78260:100, :]
     data_train = data.loc[1:len(data):100, :]
@@ -78,7 +78,7 @@ def p_limit_two_power(power_sensor_1, power_sensor_2):
     t = df_potential['timestamp'].tolist()  # Массив временных отсчетов
     a = df_potential['potential'].tolist()  # Массив значений потенциалов
 
-    data = pd.DataFrame({"t": t, "potential": a, "T": rotor_1, "N": rotor_2})
+    data = pd.DataFrame({"timestamp": t, "potential": a, "T": rotor_1, "N": rotor_2})
 
     #data_train = data.loc[1:78260:100, :]
     data_train = data.loc[1:len(data):100, :]

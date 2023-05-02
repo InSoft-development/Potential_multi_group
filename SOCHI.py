@@ -71,14 +71,14 @@ def prepare_train_multi_regress():
     path_coef_train_json = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['coef_train_json']}"
 
     if len(approxlist) == 1:
-        df_TRAIN_norm = normalization.normalize_multi_regress_one_powers(union.unite(unions_json, path_train_df),
-                                                                         path_coef_train_json, approxlist[0])
+        normalization.normalize_multi_regress_one_powers(union.unite(unions_json, path_train_df),
+                                                         path_coef_train_json, approxlist[0])
         df_norm = normalization.normalize_multi_regress_one_powers_df(union.unite(unions_json, path_truncate_power_df),
                                                                       path_coef_train_json, approxlist[0])
     else:
-        df_TRAIN_norm = normalization.normalize_multi_regress_two_powers(union.unite(unions_json, path_train_df),
-                                                                         path_coef_train_json, approxlist[1],
-                                                                         approxlist[0])
+        normalization.normalize_multi_regress_two_powers(union.unite(unions_json, path_train_df),
+                                                         path_coef_train_json, approxlist[1],
+                                                         approxlist[0])
         df_norm = normalization.normalize_multi_regress_two_powers_df(union.unite(unions_json, path_truncate_power_df),
                                                                       path_coef_train_json, approxlist[1],
                                                                       approxlist[0])

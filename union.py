@@ -31,7 +31,7 @@ def json_build(source, config, path_to_save, sheet='SOCHI'):
         path_to_original_kks = f"{DATA_DIR}{os.sep}{config['paths']['files']['original_kks']}"
         path_to_original_group_csv = f"{DATA_DIR}{os.sep}{config['paths']['files']['original_group_csv']}"
         data_csv = pd.read_csv(path_to_original_kks, delimiter=';', header=None)
-        data_group = pd.read_csv(path_to_original_group_csv, delimiter=';', header=None)
+        data_group = pd.read_csv(path_to_original_group_csv, delimiter=',')
     print(data_group)
 
     if 3 not in data_csv.columns.to_list():

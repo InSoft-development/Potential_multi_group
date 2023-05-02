@@ -66,7 +66,7 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
         data={'timestamp': df_csv['timestamp']})
     end_regression = []
 
-    df_csv = pd.merge(df_csv, df_probability, how='left')
+    df_csv = pd.merge(df_csv, df_probability, how='left', on='timestamp')
     print(df_csv)
     # Сглаживание вероятности
     df_csv = rolling_probability(df_csv)
