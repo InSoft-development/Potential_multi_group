@@ -19,7 +19,7 @@ def create_parser():
 
 def interval_group(group):
     print("group", group)
-    df_anomaly = pd.read_csv(path_to_anomaly_time, index_col=[0])
+    df_anomaly = pd.read_csv(path_to_anomaly_time)
 
     df_anomaly['timestamp'] = pd.to_datetime(df_anomaly['timestamp'], format="%Y-%m-%d %H:%M:%S")
     print(df_anomaly)

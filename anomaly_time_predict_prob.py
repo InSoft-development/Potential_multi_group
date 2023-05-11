@@ -59,7 +59,7 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
     else:
         print("complete field source_input_data in config (possible value: clickhouse, sqlite, csv) and rerun script")
         exit(0)
-    df_probability = pd.read_csv(path_to_probability, index_col=0)
+    df_probability = pd.read_csv(path_to_probability)
 
     df_prediction_time = pd.DataFrame(
         columns=['timestamp', 'N', 'potential', 'KrP', 'P', 'anomaly_time', 'KrT', 'anomaly_date'],
@@ -183,7 +183,7 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
     with open(path_to_save_models, 'w', encoding='utf8') as f:
         json.dump(models_json, f, ensure_ascii=False, indent=4)
 
-    df_prediction_time.to_csv(path_to_anomaly_time)
+    df_prediction_time.to_csv(path_to_anomaly_time, index=False)
     print("len of df: ", len(df_csv))
     print("time of code : ", end, " seconds")
     print("average time of regression: ", sum(end_regression) / len(end_regression), " seconds")

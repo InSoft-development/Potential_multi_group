@@ -48,7 +48,7 @@ def p_limit_one_power(power_sensor):
     plt.plot(d, probabilities, 'g')
     plt.plot(d, potentials, 'r')
     data['P'] = [100 * (1 - i) for i in dist.cdf(data['potential'].values)]
-    data.to_csv(path_to_probability)
+    data.to_csv(path_to_probability, index=False)
     print("limit ok")
 
     df = pd.DataFrame(data={'potential': d, 'probability': probabilities}, index=None)
@@ -93,7 +93,7 @@ def p_limit_two_power(power_sensor_1, power_sensor_2):
     plt.plot(d, probabilities, 'g')
     plt.plot(d, potentials, 'r')
     data['P'] = [100 * (1 - i) for i in dist.cdf(data['potential'].values)]
-    data.to_csv(path_to_probability)
+    data.to_csv(path_to_probability, index=False)
     print("limit ok")
 
     df = pd.DataFrame(data={'potential': d, 'probability': probabilities}, index=None)
