@@ -21,6 +21,7 @@ def create_parser():
     parser.add_argument("group", nargs=1, help="number of sensor's group")
     parser.add_argument("path_to_points", nargs=1, help="path to files which contained points")
     parser.add_argument("path_to_index_sensors", nargs=1, help="path to json files which contained index|sensors->nums")
+    parser.add_argument("path_to_slice_csv", nargs=1, help="path to original csv files with slices for merge loss")
     parser.add_argument("-power", nargs='+', help="sensor of power: N should be typed in the end", required=True)
     return parser
 
@@ -247,6 +248,17 @@ def period_analyse():
             analyse_loop_month_two_powers(row_data, row_data_with_power)
 
 
+# merge loss со срезами для восполнения пропущенных значений по мощности
+def loss_freeze_merge(loss_path, slices_path):
+    loss = pd.read_csv(loss_path)
+    slice_csv = pd.read_csv(slices_path)
+    time_df = slice_csv['timestamp']
+    loss = pd.merge(time_df, loss, how='left', on='timestamp')
+    loss.fillna(method='ffill', inplace=True)
+    loss.fillna(value={"target_value": 0}, inplace=True)
+    loss.to_csv(f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv", index=False)
+
+
 if __name__ == '__main__':
     parser = create_parser()
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
@@ -257,6 +269,7 @@ if __name__ == '__main__':
         power = config_json['model']['approx_sensors']
         row_data = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['sqlite_norm']}"
         row_data_with_power = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
+        path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
         with open(file_json, 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
@@ -267,12 +280,14 @@ if __name__ == '__main__':
         for group in index_group:
             path_to_points = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
                              f"{config_json['paths']['files']['points_json']}{str(group)}.json"
+            path_to_loss = f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv"
             t_sum = 0
             start_group = time.time()
             period_analyse()
             t_all_group = time.time() - start_group
             print(f'Суммарное время работы математики группы {group} = {t_sum}')
             print(f'Время отработки группы {group} = {t_all_group}')
+            loss_freeze_merge(path_to_loss, path_to_csv)
     else:
         print("command's line arguments")
         namespace = parser.parse_args()
@@ -283,4 +298,5 @@ if __name__ == '__main__':
         path_to_index_sensors = namespace.path_to_index_sensors[0]
         row_data = namespace.row_data[0]
         row_data_with_power = namespace.row_data_with_power[0]
+        path_to_csv = namespace.path_to_slice_csv[0]
         period_analyse()
