@@ -10,10 +10,11 @@ DATA_DIR = f'Data'
 
 
 def create_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="select intervals")
     parser.add_argument("path_to_anomaly_time", nargs=1, help="path to CSV file with anomaly date")
     parser.add_argument("path_to_loss", nargs=1, help="path to CSV file with loss")
     parser.add_argument("path_to_intervals_json", nargs=1, help="path to saving json file with anomalies intervals")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
     return parser
 
 
@@ -170,8 +171,8 @@ if __name__ == '__main__':
                                      f"{config_json['paths']['files']['intervals_json']}{group}.json"
             interval_group(str(group))
     else:
-        print("command's line arguments")
         namespace = parser.parse_args()
+        print("command's line arguments")
         path_to_anomaly_time = namespace.path_to_anomaly_time[0]
         path_to_loss = namespace.path_to_loss[0]
         path_to_intervals_json = namespace.path_to_intervals_json[0]

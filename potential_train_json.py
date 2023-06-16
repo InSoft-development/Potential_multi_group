@@ -10,12 +10,13 @@ DATA_DIR = f'Data'
 
 
 def create_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="select points and save to json format")
     parser.add_argument("file_json", nargs=1, help="json file with unions and sensors")
     parser.add_argument("row_data", nargs=1, help="name of input sqlite with rows of data")
     parser.add_argument("N", nargs=1, help="counts of points")
     parser.add_argument("path_to_save", nargs=1, help="path to save points json (format e.g. points_)")
     parser.add_argument("-drop_sensors", nargs='+', help="sensor of powers which should be dropped", required=True)
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
     return parser
 
 
@@ -31,8 +32,8 @@ if __name__ == '__main__':
         drop_sensors = config_json['model']['approx_sensors']
         #path_to_save = f'{DATA_DIR}{os.sep}{config_json["paths"]["files"]["points_json"]}'
     else:
-        print("command's line arguments")
         namespace = parser.parse_args()
+        print("command's line arguments")
         file_name = str(namespace.row_data[0])
         N = int(namespace.N[0])
         path_json = str(namespace.file_json[0])

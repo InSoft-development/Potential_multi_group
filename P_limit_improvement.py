@@ -12,7 +12,7 @@ DATA_DIR = f'Data'
 
 
 def create_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="transfer of potentials to probability space by groups")
     parser.add_argument("path_to_df", nargs=1, help="path to CSV dataframe with potentials")
     parser.add_argument("path_to_power", nargs=1, help="path to xlsx with unnormalized power")
     parser.add_argument("path_to_probability", nargs=1, help="path to saving CSV with probabilities, potentials")
@@ -20,6 +20,7 @@ def create_parser():
     parser.add_argument("path_to_png", nargs=1, help="path to saving png picture with hist potential & probability")
     parser.add_argument("path_to_threshold", nargs=1, help="path to saving json with thresholds")
     parser.add_argument("-power", nargs='+', help="sensor of power: N should be typed in the end", required=True)
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
     return parser
 
 
@@ -164,8 +165,8 @@ if __name__ == '__main__':
                 with open(path_to_threshold_json, 'w', encoding='utf8') as f:
                     json.dump(threshold_json, f, ensure_ascii=False, indent=4)
     else:
-        print("command's line arguments")
         namespace = parser.parse_args()
+        print("command's line arguments")
         path_to_df = namespace.path_to_df[0]
         path_to_power = namespace.path_to_power[0]
         path_to_probability = namespace.path_to_probability[0]

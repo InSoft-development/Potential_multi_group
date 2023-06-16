@@ -1,5 +1,6 @@
 import json
 import os
+import argparse
 
 import pandas as pd
 import sqlite3
@@ -10,6 +11,12 @@ import normalization
 
 
 DATA_DIR = f'Data'
+
+
+def create_parser():
+    parser = argparse.ArgumentParser(description="prepare and normalize data")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    return parser
 
 
 # Функция автоматической подготовки данных для обучения с отсройкой всех параметров
@@ -93,6 +100,10 @@ def prepare_train_multi_regress():
 
 
 if __name__ == '__main__':
+    parser = create_parser()
+    namespace = parser.parse_args()
+
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
+
     prepare_train_multi_regress()

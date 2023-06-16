@@ -18,11 +18,12 @@ DATA_DIR = f'Data'
 
 
 def create_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="calculate time to anomaly through probability")
     parser.add_argument("path_to_csv", nargs=1, help="name of the original CSV file")
     parser.add_argument("path_to_probability", nargs=1, help="name of CSV file with saved probabilities")
     parser.add_argument("path_to_potentials", nargs=1, help="name of CSV file with saved potentials")
     parser.add_argument("path_to_anomaly_time", nargs=1, help="name of saving CSV file with anomaly date")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
     return parser
 
 
@@ -212,8 +213,8 @@ if __name__ == '__main__':
                                    f"{config_json['paths']['files']['anomaly_time_prob']}{group}.csv"
             calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anomaly_time)
     else:
-        print("command's line arguments")
         namespace = parser.parse_args()
+        print("command's line arguments")
         path_to_csv = namespace.path_to_csv[0]
         path_to_probability = namespace.path_to_probability[0]
         path_to_potentials = namespace.path_to_potentials[0]

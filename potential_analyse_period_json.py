@@ -14,7 +14,7 @@ points = {}
 
 
 def create_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="calculate potentials by groups")
     parser.add_argument("file_json", nargs=1, help="json file with unions and sensors")
     parser.add_argument("row_data", nargs=1, help="path of input sqlite file with normalized rows of data")
     parser.add_argument("row_data_with_power", nargs=1, help="path of input csv with unnormalized rows of data")
@@ -23,6 +23,7 @@ def create_parser():
     parser.add_argument("path_to_index_sensors", nargs=1, help="path to json files which contained index|sensors->nums")
     parser.add_argument("path_to_slice_csv", nargs=1, help="path to original csv files with slices for merge loss")
     parser.add_argument("-power", nargs='+', help="sensor of power: N should be typed in the end", required=True)
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
     return parser
 
 
@@ -289,8 +290,8 @@ if __name__ == '__main__':
             print(f'Время отработки группы {group} = {t_all_group}')
             loss_freeze_merge(path_to_loss, path_to_csv)
     else:
-        print("command's line arguments")
         namespace = parser.parse_args()
+        print("command's line arguments")
         file_json = namespace.file_json[0]
         group = namespace.group[0]
         power = namespace.power

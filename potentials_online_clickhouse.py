@@ -1,5 +1,6 @@
 import json
 import os
+import argparse
 
 import pandas as pd
 import numpy as np
@@ -11,6 +12,12 @@ import normalization
 import time
 import datetime
 import clickhouse_connect
+
+
+def create_parser():
+    parser = argparse.ArgumentParser(description="online mode of potentials method")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    return parser
 
 
 # Загрузка KKS
@@ -266,6 +273,9 @@ def create_online_table():
 
 
 if __name__ == '__main__':
+    parser = create_parser()
+    namespace = parser.parse_args()
+
     DATA_DIR = f'Data'
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
