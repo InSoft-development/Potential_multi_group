@@ -13,6 +13,8 @@ import time
 import datetime
 import clickhouse_connect
 
+DATA_DIR = f'Data'
+
 
 def create_parser():
     parser = argparse.ArgumentParser(description="online mode of potentials method")
@@ -85,7 +87,7 @@ def potentials_analyse_online_mode(data, nums, points):
 
 def online_sochi():
     freeze = False
-    client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
+    client = clickhouse_connect.get_client(host='10.23.0.87', username='default', password='asdf')
     try:
         while True:
             # Чтение ненормализованной и необъединенной последней строки из таблицы
@@ -104,9 +106,10 @@ def online_sochi():
             else:
                 freeze = False
                 # Объединение, отстройка и нормализация
-                row_union = union.unite_row(config_json['paths']['files']['json_sensors'], last_row.to_dict())
+                row_union = union.unite_row(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}",
+                                            last_row.to_dict())
                 row_norm = normalization.normalize_multi_regress_two_powers_row(row_union,
-                                                                                config_json['paths']['files']['coef_train_json'],
+                                                                                f"{DATA_DIR}{os.sep}{config_json['paths']['files']['coef_train_json']}",
                                                                                 approxlist[1], approxlist[0])
                 # Выбрасываем отстроечные параметры из словаря
                 del row_norm[approxlist[0]]
@@ -276,7 +279,6 @@ if __name__ == '__main__':
     parser = create_parser()
     namespace = parser.parse_args()
 
-    DATA_DIR = f'Data'
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
     with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
