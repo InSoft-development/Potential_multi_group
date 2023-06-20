@@ -68,9 +68,9 @@ python potentials_online_clickhouse
 
 ### Результаты выполнения скриптов
 
-Последовательность работы скриптов и результаты их работы демонстрирует диаграмма потоков данных ![SOCHI_offline_potentials data flow](SOCHI_offline_potentials.png)
+Последовательность работы скриптов и результаты их работы демонстрирует диаграмма потоков данных ![SOCHI_offline_potentials data flow](image/SOCHI_offline_potentials.png)
 
-![SOCHI_online_potentials data flow](SOCHI_online_potentials.png)
+![SOCHI_online_potentials data flow](image/SOCHI_online_potentials.png)
 
 В результате последовательного выполнения скриптов в директории Data будут появляться директории, содержащие json и csv файлы с результатами работы метода.
 В директории json_interval будут сохранены найденные аномальные интервалы; в директориях соответствующих групп появятся csv с вычисленными потенциалами, вероятностями.
