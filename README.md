@@ -66,6 +66,12 @@ python store_for_reports.py
 python potentials_online_clickhouse
 ```
 
+Если в качестве источника исходных данных в конфиге были указаны csv-файлы, то необходимо в директорию `Data` положить следующие файлы:
+
+- файл срезов `slices.csv`;
+- файл наименования групп `groups.csv`;
+- файл KKS датчиков с их принадлежностью к группам `kks_with_groups.csv`.
+
 ### Результаты выполнения скриптов
 
 Последовательность работы скриптов и результаты их работы демонстрирует диаграмма потоков данных ![SOCHI_offline_potentials data flow](image/SOCHI_offline_potentials.png)
