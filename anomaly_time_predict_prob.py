@@ -4,7 +4,6 @@ from sklearn.linear_model import LinearRegression
 import datetime
 from dateutil import parser as parse_date
 import argparse
-import sys
 
 import time
 
@@ -19,11 +18,7 @@ DATA_DIR = f'Data'
 
 def create_parser():
     parser = argparse.ArgumentParser(description="calculate time to anomaly through probability")
-    parser.add_argument("path_to_csv", nargs=1, help="name of the original CSV file")
-    parser.add_argument("path_to_probability", nargs=1, help="name of CSV file with saved probabilities")
-    parser.add_argument("path_to_potentials", nargs=1, help="name of CSV file with saved potentials")
-    parser.add_argument("path_to_anomaly_time", nargs=1, help="name of saving CSV file with anomaly date")
-    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.1")
     return parser
 
 
@@ -141,10 +136,8 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
                     # Аномалия могла уже наступить
                     date_time = parse_date.parse(row['timestamp'])
                     df_prediction_time.iloc[index]['anomaly_time'] = \
-                        0.0 if max(0, root / config_json['number_of_samples']) == 0 else (root / config_json['number_of_samples'])
-                    df_prediction_time.iloc[index]['anomaly_time'] = \
-                        0.0 if max(0, root / config_json['number_of_samples']) == 0 else (
-                                root / config_json['number_of_samples'])
+                        0.0 if max(0, (root - float(index)) / config_json['number_of_samples']) == 0 else (
+                                (root - float(index)) / config_json['number_of_samples'])
                     df_prediction_time.iloc[index]['anomaly_date'] = date_time + datetime.timedelta(
                         hours=(root) / config_json['number_of_samples'])
                     df_prediction_time.iloc[index]['anomaly_date'] = df_prediction_time.iloc[index][
@@ -193,30 +186,22 @@ def calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anom
 if __name__ == '__main__':
     # Заполнение коэффициентов json из всего dataframe
     parser = create_parser()
+    namespace = parser.parse_args()
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
-    if len(sys.argv) == 1:
-        print("config SOCHI")
-        path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
-        with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
-            json_dict = json.load(f)
+    print("config SOCHI")
+    path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
+    with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
+        json_dict = json.load(f)
 
-        index_group = [list(x.keys())[0] for x in json_dict["groups"]]
-        if index_group[0] == '0':
-            index_group.remove('0')
-        for group in index_group:
-            path_to_probability = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                  f"{config_json['paths']['files']['probability_csv']}{group}.csv"
-            path_to_potentials = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                 f"{config_json['paths']['files']['potentials_csv']}{group}.csv"
-            path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                   f"{config_json['paths']['files']['anomaly_time_prob']}{group}.csv"
-            calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anomaly_time)
-    else:
-        namespace = parser.parse_args()
-        print("command's line arguments")
-        path_to_csv = namespace.path_to_csv[0]
-        path_to_probability = namespace.path_to_probability[0]
-        path_to_potentials = namespace.path_to_potentials[0]
-        path_to_anomaly_time = namespace.path_to_anomaly_time[0]
+    index_group = [list(x.keys())[0] for x in json_dict["groups"]]
+    if index_group[0] == '0':
+        index_group.remove('0')
+    for group in index_group:
+        path_to_probability = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                              f"{config_json['paths']['files']['probability_csv']}{group}.csv"
+        path_to_potentials = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                             f"{config_json['paths']['files']['potentials_csv']}{group}.csv"
+        path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                               f"{config_json['paths']['files']['anomaly_time_prob']}{group}.csv"
         calculate_anomaly_time_all_df(path_to_csv, path_to_probability, path_to_anomaly_time)

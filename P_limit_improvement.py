@@ -1,5 +1,4 @@
 import argparse
-import sys
 import json
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,14 +12,7 @@ DATA_DIR = f'Data'
 
 def create_parser():
     parser = argparse.ArgumentParser(description="transfer of potentials to probability space by groups")
-    parser.add_argument("path_to_df", nargs=1, help="path to CSV dataframe with potentials")
-    parser.add_argument("path_to_power", nargs=1, help="path to xlsx with unnormalized power")
-    parser.add_argument("path_to_probability", nargs=1, help="path to saving CSV with probabilities, potentials")
-    parser.add_argument("path_to_csv", nargs=1, help="path to saving CSV with table potential & probability")
-    parser.add_argument("path_to_png", nargs=1, help="path to saving png picture with hist potential & probability")
-    parser.add_argument("path_to_threshold", nargs=1, help="path to saving json with thresholds")
-    parser.add_argument("-power", nargs='+', help="sensor of power: N should be typed in the end", required=True)
-    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.1")
     return parser
 
 
@@ -115,70 +107,47 @@ def p_limit_two_power(power_sensor_1, power_sensor_2):
 
 if __name__ == '__main__':
     parser = create_parser()
+    namespace = parser.parse_args()
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
-    if len(sys.argv) == 1:
-        print("config SOCHI")
-        #path_to_df = "1\\" + config_json['paths']['files']['potentials_csv']
-        path_to_power = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
-        #path_to_probability = config_json['paths']['files']['probability_csv']
-        #path_to_csv = config_json['paths']['files']['table_potential_probability']
-        #path_to_png = config_json['paths']['graphs']['hist_potential_probability']
-        #path_to_threshold_json = config_json['paths']['files']['threshold_json']
-        power = config_json['model']['approx_sensors']
-        with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
-            json_dict = json.load(f)
+    print("config SOCHI")
+    path_to_power = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
+    power = config_json['model']['approx_sensors']
+    with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
+        json_dict = json.load(f)
 
-        index_group = [list(x.keys())[0] for x in json_dict["groups"]]
-        if index_group[0] == '0':
-            index_group.remove('0')
-        if len(power) == 1:
-            for group in index_group:
-                path_to_probability = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                      f"{config_json['paths']['files']['probability_csv']}{group}.csv"
-                path_to_csv = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                              f"{config_json['paths']['files']['table_potential_probability']}{group}.csv"
-                path_to_png = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                              f"config_json['paths']['graphs']['hist_potential_probability']{group}.png"
-                path_to_threshold_json = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                         f"{config_json['paths']['files']['threshold_json']}{group}.json"
-                threshold_json = {}
-                path_to_df = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                             f"{config_json['paths']['files']['potentials_csv']}{group}.csv"
-                p_limit_one_power(power[0])
-                with open(path_to_threshold_json, 'w', encoding='utf8') as f:
-                    json.dump(threshold_json, f, ensure_ascii=False, indent=4)
-        else:
-            for group in index_group:
-                path_to_probability = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                      f"{config_json['paths']['files']['probability_csv']}{group}.csv"
-                path_to_csv = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                              f"{config_json['paths']['files']['table_potential_probability']}{group}.csv"
-                path_to_png = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                              f"{config_json['paths']['graphs']['hist_potential_probability']}{group}.png"
-                path_to_threshold_json = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                                         f"{config_json['paths']['files']['threshold_json']}{group}.json"
-                threshold_json = {}
-                path_to_df = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                             f"{config_json['paths']['files']['potentials_csv']}{group}.csv"
-                p_limit_two_power(power[0], power[1])
-                with open(path_to_threshold_json, 'w', encoding='utf8') as f:
-                    json.dump(threshold_json, f, ensure_ascii=False, indent=4)
-    else:
-        namespace = parser.parse_args()
-        print("command's line arguments")
-        path_to_df = namespace.path_to_df[0]
-        path_to_power = namespace.path_to_power[0]
-        path_to_probability = namespace.path_to_probability[0]
-        path_to_csv = namespace.path_to_csv[0]
-        path_to_png = namespace.path_to_png[0]
-        path_to_threshold_json = namespace.path_to_threshold[0]
-        power = namespace.power
-        threshold_json = {}
-        if len(power) == 1:
+    index_group = [list(x.keys())[0] for x in json_dict["groups"]]
+    if index_group[0] == '0':
+        index_group.remove('0')
+    if len(power) == 1:
+        for group in index_group:
+            path_to_probability = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                  f"{config_json['paths']['files']['probability_csv']}{group}.csv"
+            path_to_csv = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                          f"{config_json['paths']['files']['table_potential_probability']}{group}.csv"
+            path_to_png = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                          f"config_json['paths']['graphs']['hist_potential_probability']{group}.png"
+            path_to_threshold_json = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                     f"{config_json['paths']['files']['threshold_json']}{group}.json"
+            threshold_json = {}
+            path_to_df = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                         f"{config_json['paths']['files']['potentials_csv']}{group}.csv"
             p_limit_one_power(power[0])
-        else:
+            with open(path_to_threshold_json, 'w', encoding='utf8') as f:
+                json.dump(threshold_json, f, ensure_ascii=False, indent=4)
+    else:
+        for group in index_group:
+            path_to_probability = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                  f"{config_json['paths']['files']['probability_csv']}{group}.csv"
+            path_to_csv = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                          f"{config_json['paths']['files']['table_potential_probability']}{group}.csv"
+            path_to_png = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                          f"{config_json['paths']['graphs']['hist_potential_probability']}{group}.png"
+            path_to_threshold_json = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                                     f"{config_json['paths']['files']['threshold_json']}{group}.json"
+            threshold_json = {}
+            path_to_df = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                         f"{config_json['paths']['files']['potentials_csv']}{group}.csv"
             p_limit_two_power(power[0], power[1])
-        with open(path_to_threshold_json, 'w', encoding='utf8') as f:
-            json.dump(threshold_json, f, ensure_ascii=False, indent=4)
-
+            with open(path_to_threshold_json, 'w', encoding='utf8') as f:
+                json.dump(threshold_json, f, ensure_ascii=False, indent=4)

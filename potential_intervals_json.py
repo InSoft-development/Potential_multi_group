@@ -1,5 +1,4 @@
 import argparse
-import sys
 import json
 import pandas as pd
 
@@ -11,10 +10,10 @@ DATA_DIR = f'Data'
 
 def create_parser():
     parser = argparse.ArgumentParser(description="select intervals")
-    parser.add_argument("path_to_anomaly_time", nargs=1, help="path to CSV file with anomaly date")
-    parser.add_argument("path_to_loss", nargs=1, help="path to CSV file with loss")
-    parser.add_argument("path_to_intervals_json", nargs=1, help="path to saving json file with anomalies intervals")
-    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    parser.add_argument("-m", "--method", type=str,
+                        help="indicate the selected method for calculating time to anomaly: type probability "
+                             "or intercept")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.1")
     return parser
 
 
@@ -77,11 +76,6 @@ def interval_group(group):
             }
             dict_list.append(dictionary)
             jT = 0
-    # try:
-    #     os.mkdir("json_interval")
-    # except Exception as e:
-    #     print(e)
-    #     print('Directory exist')
     try:
         os.mkdir(f"{DATA_DIR}{os.sep}json_interval{os.sep}")
     except Exception as e:
@@ -147,12 +141,16 @@ def mean_index(data, top_count=3):
 if __name__ == '__main__':
     # Заполнение коэффициентов json из всего dataframe
     parser = create_parser()
+    namespace = parser.parse_args()
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
-    if len(sys.argv) == 1:
+    if namespace.method:
+        if (namespace.method != "probability") and (namespace.method != "intercept"):
+            print("Please choose method: -m {probability, intercept}")
+            exit(0)
         print("config SOCHI")
-        print("Enter 0 for choose anomaly_time_prob frame\nEnter 1 for choose anomaly_time_intercept frame")
-        input_anomaly_file = input()
+        # print("Enter 0 for choose anomaly_time_prob frame\nEnter 1 for choose anomaly_time_intercept frame")
+        # input_anomaly_file = input()
         with open(f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}", 'r', encoding='utf8') as f:
             json_dict = json.load(f)
 
@@ -160,21 +158,13 @@ if __name__ == '__main__':
         if index_group[0] == '0':
             index_group.remove('0')
         for group in index_group:
-            if int(input_anomaly_file) == 0:
+            if namespace.method == "probability":
                 path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
                                        f"{config_json['paths']['files']['anomaly_time_prob']}{group}.csv"
-            if int(input_anomaly_file) == 1:
+            if namespace.method == "intercept":
                 path_to_anomaly_time = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
                                        f"{config_json['paths']['files']['anomaly_time_intercept']}{group}.csv"
             path_to_loss = f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv"
             path_to_intervals_json = f"{DATA_DIR}{os.sep}json_interval{os.sep}" \
                                      f"{config_json['paths']['files']['intervals_json']}{group}.json"
             interval_group(str(group))
-    else:
-        namespace = parser.parse_args()
-        print("command's line arguments")
-        path_to_anomaly_time = namespace.path_to_anomaly_time[0]
-        path_to_loss = namespace.path_to_loss[0]
-        path_to_intervals_json = namespace.path_to_intervals_json[0]
-        for g in range(1, config_json['count_of_groups']+1):
-            interval_group(str(g))

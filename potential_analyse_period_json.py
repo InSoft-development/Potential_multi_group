@@ -1,5 +1,4 @@
 import argparse
-import sys
 import json
 import os
 import sqlite3
@@ -15,15 +14,7 @@ points = {}
 
 def create_parser():
     parser = argparse.ArgumentParser(description="calculate potentials by groups")
-    parser.add_argument("file_json", nargs=1, help="json file with unions and sensors")
-    parser.add_argument("row_data", nargs=1, help="path of input sqlite file with normalized rows of data")
-    parser.add_argument("row_data_with_power", nargs=1, help="path of input csv with unnormalized rows of data")
-    parser.add_argument("group", nargs=1, help="number of sensor's group")
-    parser.add_argument("path_to_points", nargs=1, help="path to files which contained points")
-    parser.add_argument("path_to_index_sensors", nargs=1, help="path to json files which contained index|sensors->nums")
-    parser.add_argument("path_to_slice_csv", nargs=1, help="path to original csv files with slices for merge loss")
-    parser.add_argument("-power", nargs='+', help="sensor of power: N should be typed in the end", required=True)
-    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.1")
     return parser
 
 
@@ -262,42 +253,30 @@ def loss_freeze_merge(loss_path, slices_path):
 
 if __name__ == '__main__':
     parser = create_parser()
+    namespace = parser.parse_args()
     with open("config_SOCHI.json", 'r', encoding='utf8') as j:
         config_json = json.load(j)
-    if len(sys.argv) == 1:
-        print("config SOCHI")
-        file_json = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}"
-        power = config_json['model']['approx_sensors']
-        row_data = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['sqlite_norm']}"
-        row_data_with_power = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
-        path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
-        with open(file_json, 'r', encoding='utf8') as f:
-            json_dict = json.load(f)
+    print("config SOCHI")
+    file_json = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['json_sensors']}"
+    power = config_json['model']['approx_sensors']
+    row_data = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['sqlite_norm']}"
+    row_data_with_power = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
+    path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
+    with open(file_json, 'r', encoding='utf8') as f:
+        json_dict = json.load(f)
 
-        index_group = [list(x.keys())[0] for x in json_dict["groups"]]
-        if index_group[0] == '0':
-            index_group.remove('0')
-        print(index_group)
-        for group in index_group:
-            path_to_points = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
-                             f"{config_json['paths']['files']['points_json']}{str(group)}.json"
-            path_to_loss = f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv"
-            t_sum = 0
-            start_group = time.time()
-            period_analyse()
-            t_all_group = time.time() - start_group
-            print(f'Суммарное время работы математики группы {group} = {t_sum}')
-            print(f'Время отработки группы {group} = {t_all_group}')
-            loss_freeze_merge(path_to_loss, path_to_csv)
-    else:
-        namespace = parser.parse_args()
-        print("command's line arguments")
-        file_json = namespace.file_json[0]
-        group = namespace.group[0]
-        power = namespace.power
-        path_to_points = namespace.path_to_points[0]
-        path_to_index_sensors = namespace.path_to_index_sensors[0]
-        row_data = namespace.row_data[0]
-        row_data_with_power = namespace.row_data_with_power[0]
-        path_to_csv = namespace.path_to_slice_csv[0]
+    index_group = [list(x.keys())[0] for x in json_dict["groups"]]
+    if index_group[0] == '0':
+        index_group.remove('0')
+    print(index_group)
+    for group in index_group:
+        path_to_points = f"{DATA_DIR}{os.sep}{group}{os.sep}" \
+                         f"{config_json['paths']['files']['points_json']}{str(group)}.json"
+        path_to_loss = f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv"
+        t_sum = 0
+        start_group = time.time()
         period_analyse()
+        t_all_group = time.time() - start_group
+        print(f'Суммарное время работы математики группы {group} = {t_sum}')
+        print(f'Время отработки группы {group} = {t_all_group}')
+        loss_freeze_merge(path_to_loss, path_to_csv)

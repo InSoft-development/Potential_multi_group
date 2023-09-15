@@ -1,5 +1,4 @@
 import argparse
-import sys
 import os
 import json
 import sqlite3
@@ -11,34 +10,20 @@ DATA_DIR = f'Data'
 
 def create_parser():
     parser = argparse.ArgumentParser(description="select points and save to json format")
-    parser.add_argument("file_json", nargs=1, help="json file with unions and sensors")
-    parser.add_argument("row_data", nargs=1, help="name of input sqlite with rows of data")
-    parser.add_argument("N", nargs=1, help="counts of points")
-    parser.add_argument("path_to_save", nargs=1, help="path to save points json (format e.g. points_)")
-    parser.add_argument("-drop_sensors", nargs='+', help="sensor of powers which should be dropped", required=True)
-    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.1")
     return parser
 
 
 if __name__ == '__main__':
     parser = create_parser()
+    namespace = parser.parse_args()
     with open(f'config_SOCHI.json', 'r', encoding='utf8') as j:
         config_json = json.load(j)
-    if len(sys.argv) == 1:
-        print("config SOCHI_generator")
-        file_name = f'{DATA_DIR}{os.sep}{config_json["paths"]["files"]["sqlite_norm"]}'
-        N = config_json['model']['N_l']
-        path_json = f'{DATA_DIR}{os.sep}{config_json["paths"]["files"]["json_sensors"]}'
-        drop_sensors = config_json['model']['approx_sensors']
-        #path_to_save = f'{DATA_DIR}{os.sep}{config_json["paths"]["files"]["points_json"]}'
-    else:
-        namespace = parser.parse_args()
-        print("command's line arguments")
-        file_name = str(namespace.row_data[0])
-        N = int(namespace.N[0])
-        path_json = str(namespace.file_json[0])
-        drop_sensors = namespace.drop_sensors
-        path_to_save = str(namespace.path_to_save[0])
+    print("config SOCHI_generator")
+    file_name = f'{DATA_DIR}{os.sep}{config_json["paths"]["files"]["sqlite_norm"]}'
+    N = config_json['model']['N_l']
+    path_json = f'{DATA_DIR}{os.sep}{config_json["paths"]["files"]["json_sensors"]}'
+    drop_sensors = config_json['model']['approx_sensors']
 
     # DataFrame с нормализованными данными
     con = sqlite3.connect(file_name)

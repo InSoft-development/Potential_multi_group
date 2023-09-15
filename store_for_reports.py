@@ -8,7 +8,7 @@ import argparse
 
 def create_parser():
     parser = argparse.ArgumentParser(description="add output files for input to streamlit web-app")
-    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.1")
     return parser
 
 
