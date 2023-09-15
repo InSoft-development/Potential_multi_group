@@ -18,7 +18,7 @@ DATA_DIR = f'Data'
 
 def create_parser():
     parser = argparse.ArgumentParser(description="online mode of potentials method")
-    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", help="print version", version="1.0.1")
     return parser
 
 
