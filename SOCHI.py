@@ -31,14 +31,16 @@ def prepare_train_multi_regress():
     # Чтение ненормализованного и необъединенного файла csv
     if source_data == "clickhouse":
         print("source from clickhouse")
-        client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
-        df_original = client.query_df(f"{config_json['paths']['database']['clickhouse']['original_csv_query']}")
+        client = clickhouse_connect.get_client(host=config_json['paths']['database']['clickhouse']['host_ip'],
+                                               username=config_json['paths']['database']['clickhouse']['username'],
+                                               password=config_json['paths']['database']['clickhouse']['password'])
+        df_original = client.query_df(config_json['paths']['database']['clickhouse']['original_csv_query'])
         df_original.drop(columns=blacklist, inplace=True)
         client.close()
     elif source_data == "sqlite":
         print("source from sqlite")
-        client = sqlite3.connect(f"{config_json['paths']['database']['sqlite']['original_csv']}")
-        df_original = pd.read_sql_query(f"{config_json['paths']['database']['sqlite']['original_csv_query']}", client)
+        client = sqlite3.connect(config_json['paths']['database']['sqlite']['original_csv'])
+        df_original = pd.read_sql_query(config_json['paths']['database']['sqlite']['original_csv_query'], client)
         df_original.drop(columns=blacklist, inplace=True)
         client.close()
     elif source_data == "csv":

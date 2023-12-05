@@ -9,22 +9,24 @@ import clickhouse_connect
 # Функция сериализует и записывает json c выделенными union
 def json_build(source, config, path_to_save, sheet='SOCHI'):
     if source == "clickhouse":
-        client = clickhouse_connect.get_client(host='10.23.0.177', username='default', password='asdf')
-        data_csv = client.query_df(f"{config['paths']['database']['clickhouse']['original_kks_query']}")
+        client = clickhouse_connect.get_client(host=config['paths']['database']['clickhouse']['host_ip'],
+                                               username=config['paths']['database']['clickhouse']['username'],
+                                               password=config['paths']['database']['clickhouse']['password'])
+        data_csv = client.query_df(config['paths']['database']['clickhouse']['original_kks_query'])
         data_csv.rename(columns={'kks': 0, 'name': 1, 'group': 2}, inplace=True)
         data_csv[2] = data_csv[2].astype('int64')
         data_csv[2] = data_csv[2].astype('string')
-        data_group = client.query_df(f"{config['paths']['database']['clickhouse']['original_group_query']}")
+        data_group = client.query_df(config['paths']['database']['clickhouse']['original_group_query'])
         client.close()
     elif source == "sqlite":
-        client = sqlite3.connect(f"{config['paths']['database']['sqlite']['original_kks']}")
-        data_csv = pd.read_sql_query(f"{config['paths']['database']['sqlite']['original_kks_query']}", client)
+        client = sqlite3.connect(config['paths']['database']['sqlite']['original_kks'])
+        data_csv = pd.read_sql_query(config['paths']['database']['sqlite']['original_kks_query'], client)
         data_csv.rename(columns={'kks': 0, 'name': 1, 'group': 2}, inplace=True)
         data_csv[2] = data_csv[2].astype('int64')
         data_csv[2] = data_csv[2].astype('string')
         client.close()
-        client = sqlite3.connect(f"{config['paths']['database']['sqlite']['original_group']}")
-        data_group = pd.read_sql_query(f"{config['paths']['database']['sqlite']['original_group_query']}", client)
+        client = sqlite3.connect(config['paths']['database']['sqlite']['original_group'])
+        data_group = pd.read_sql_query(config['paths']['database']['sqlite']['original_group_query'], client)
         client.close()
     else:
         DATA_DIR = f'Data'

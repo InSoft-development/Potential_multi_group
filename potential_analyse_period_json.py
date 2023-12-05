@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import sqlite3
+import clickhouse_connect
 
 import pandas as pd
 import time
@@ -241,9 +242,32 @@ def period_analyse():
 
 
 # merge loss со срезами для восполнения пропущенных значений по мощности
-def loss_freeze_merge(loss_path, slices_path):
+def loss_freeze_merge(loss_path):
+    source_data = config_json["source_input_data"]
+
+    # Чтение ненормализованного и необъединенного файла csv
+    if source_data == "clickhouse":
+        print("source from clickhouse")
+        client = clickhouse_connect.get_client(host=config_json['paths']['database']['clickhouse']['host_ip'],
+                                               username=config_json['paths']['database']['clickhouse']['username'],
+                                               password=config_json['paths']['database']['clickhouse']['password'])
+        slice_csv = client.query_df(config_json['paths']['database']['clickhouse']['original_csv_query'])
+        slice_csv['timestamp'] = slice_csv['timestamp'].astype('string')
+        client.close()
+    elif source_data == "sqlite":
+        print("source from sqlite")
+        client = sqlite3.connect(config_json['paths']['database']['sqlite']['original_csv'])
+        slice_csv = pd.read_sql_query(config_json['paths']['database']['sqlite']['original_csv_query'], client)
+        slice_csv['timestamp'] = slice_csv['timestamp'].astype('string')
+        client.close()
+    elif source_data == "csv":
+        print("source from csv")
+        path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
+        slice_csv = pd.read_csv(path_to_csv)
+    else:
+        print("complete field source_input_data in config (possible value: clickhouse, sqlite, csv) and rerun script")
+        exit(0)
     loss = pd.read_csv(loss_path)
-    slice_csv = pd.read_csv(slices_path)
     time_df = slice_csv['timestamp']
     loss = pd.merge(time_df, loss, how='left', on='timestamp')
     loss.fillna(method='ffill', inplace=True)
@@ -261,7 +285,7 @@ if __name__ == '__main__':
     power = config_json['model']['approx_sensors']
     row_data = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['sqlite_norm']}"
     row_data_with_power = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['csv_truncate_by_power']}"
-    path_to_csv = f"{DATA_DIR}{os.sep}{config_json['paths']['files']['original_csv']}"
+
     with open(file_json, 'r', encoding='utf8') as f:
         json_dict = json.load(f)
 
@@ -279,4 +303,4 @@ if __name__ == '__main__':
         t_all_group = time.time() - start_group
         print(f'Суммарное время работы математики группы {group} = {t_sum}')
         print(f'Время отработки группы {group} = {t_all_group}')
-        loss_freeze_merge(path_to_loss, path_to_csv)
+        loss_freeze_merge(path_to_loss)
