@@ -87,7 +87,9 @@ def potentials_analyse_online_mode(data, nums, points):
 
 def online_sochi():
     freeze = False
-    client = clickhouse_connect.get_client(host='10.23.0.87', username='default', password='asdf')
+    client = clickhouse_connect.get_client(host=config_json['paths']['database']['clickhouse']['host_ip'],
+                                           username=config_json['paths']['database']['clickhouse']['username'],
+                                           password=config_json['paths']['database']['clickhouse']['password'])
     try:
         while True:
             # Чтение ненормализованной и необъединенной последней строки из таблицы
@@ -97,7 +99,7 @@ def online_sochi():
             # Отсечка по мощности
             if last_row[approxlist[1]][0] <= config_json['model']['N']:
                 print(f'текущая мощность = {last_row[approxlist[1]][0]} <= {config_json["model"]["N"]}')
-                print(f'морозим без вычислений потенциал, loss, вероятность')
+                print(f'обрабатываем без вычислений потенциал, loss, вероятность')
                 # Запрос на предпоследнюю строку
                 #penult_last = client.query_df("SELECT * from slices_play order by timestamp desc limit 2").tail(2)
                 #last_row[approxlist[1]][0] = penult_last.iloc[1][approxlist[1]]
@@ -125,8 +127,10 @@ def online_sochi():
                     penult_loss_row = client.query_df(f"SELECT * FROM potential_loss_{group} order by timestamp desc limit 1").tail(1)
                     if penult_predict_row.empty or penult_loss_row.empty:
                         continue
-                    potential = penult_predict_row['potential'].values[0]
-                    prob = penult_predict_row['probability'].values[0]
+                    potential = 100.0
+                    prob = 0.0
+                    # potential = penult_predict_row['potential'].values[0]
+                    # prob = penult_predict_row['probability'].values[0]
                     penult_loss_row.drop(columns='timestamp', inplace=True)
 
                     loss = penult_loss_row
