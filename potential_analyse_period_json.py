@@ -104,6 +104,7 @@ def analyse_loop_month_one_powers(file_name, file_power):
     t = []
     flag = True
     rotor = []
+    loss_list = []
     # Аномальность
     anomaly_index = []
     # подготовка массивов с индексами 5-ки "наибольших" центров
@@ -122,6 +123,7 @@ def analyse_loop_month_one_powers(file_name, file_power):
         #print("a = ", a, "s = ", s)
         # Значение мощности
         r = df_power.iloc[index][power[0]]
+        loss_list.append(loss)
 
         if flag:
             if a > 100:
@@ -153,7 +155,7 @@ def analyse_loop_month_one_powers(file_name, file_power):
     #     df['index' + str(i)] = anomaly_index[i]
     df.to_csv(f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['potentials_csv']}{group}.csv", index=False)
 
-    df_loss = pd.DataFrame(data=loss)
+    df_loss = pd.DataFrame(data=loss_list)
     df_loss['timestamp'] = t
     df_loss.to_csv(f"{DATA_DIR}{os.sep}{group}{os.sep}{config_json['paths']['files']['loss_csv']}{group}.csv", index=False)
 
